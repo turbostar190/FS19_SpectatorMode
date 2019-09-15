@@ -81,5 +81,5 @@ function Vehicle:spectatorMode_getSpecTable()
         return spec
     end
 
-    return self["spec_" .. name]
+    return self["spec_SMV"]
 end
