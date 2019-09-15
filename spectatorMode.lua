@@ -55,6 +55,9 @@ function SpectatorMode:new(mission, i18n, modDirectory, gui, inputManager, dedic
     self.lastPlayer = {}
     self.lastPlayer.mmState = 0
     self.lastPlayer.lightNode = 0
+    self.lastPlayer.lastPositionX = 0
+    self.lastPlayer.lastPositionY = 0
+    self.lastPlayer.lastPositionZ = 0
 
     FSBaseMission.registerActionEvents = Utils.appendedFunction(FSBaseMission.registerActionEvents, self.inj_fsBaseMission_registerActionEvents)
 
@@ -67,7 +70,7 @@ function SpectatorMode:new(mission, i18n, modDirectory, gui, inputManager, dedic
     Player.onEnter = Utils.appendedFunction(Player.onEnter, PlayerExtensions.onEnter)
     Player.drawUIInfo = Utils.overwrittenFunction(Player.drawUIInfo, PlayerExtensions.drawUIInfo)
     Player.getPositionData = Utils.overwrittenFunction(Player.getPositionData, PlayerExtensions.getPositionData)
-    Player.isSpectated = PlayerExtensions.isSpectated
+    --Player.isSpectated = PlayerExtensions.isSpectated
 
     -- Misc
     FSBaseMission.onConnectionClosed = Utils.prependedFunction(FSBaseMission.onConnectionClosed, self.onConnectionClosed)
@@ -92,10 +95,16 @@ end
 ---This is called before anything of the game has been created.
 -- The vehicle types must not be initialized yet to make any changes to them.
 function SpectatorMode.installSpecialization(vehicleTypeManager, specializationManager, modDirectory, modName)
-    VehicleExtensions.installSpecialization(vehicleTypeManager, specializationManager, modDirectory, modName)
+    specializationManager:addSpecialization("SMV", "SMVehicle", Utils.getFilename("extensions/SMVehicle.lua", modDirectory), nil) -- Nil is important here
+
+    for typeName, typeEntry in pairs(vehicleTypeManager:getVehicleTypes()) do
+        if SpecializationUtil.hasSpecialization(Enterable, typeEntry.specializations) then
+            vehicleTypeManager:addSpecialization(typeName, modName .. ".SMV")
+        end
+    end
 end
 
----Called when the player clicks the Start button
+--[[---Called when the player clicks the Start button
 function SpectatorMode:onMissionStart(mission)
     print("onMissionStart")
     self.usersOld = {};
@@ -103,7 +112,7 @@ function SpectatorMode:onMissionStart(mission)
     for _, u in pairs(mission.userManager.users) do
         table.insert(g_spectatorMode.usersOld, { userId = u.userId, nickname = u.nickname })
     end
-end
+end]]
 
 function SpectatorMode:registerActionEvents()
     if self.isClient then
@@ -147,7 +156,7 @@ end
 function SpectatorMode:getSpectableUsers()
     local spectableUsers = {}
     for _, p in pairs(g_currentMission.players) do
-        if not p.isDedicatedServer and not p:isSpectated() and g_currentMission.player.visualInformation.playerName ~= p.visualInformation.playerName then
+        if not p.isDedicatedServer and not p:getIsSpectated() and g_currentMission.player.visualInformation.playerName ~= p.visualInformation.playerName then
             table.insert(spectableUsers, p.visualInformation.playerName)
         end
     end
@@ -281,6 +290,7 @@ function SpectatorMode:draw()
 end
 
 function SpectatorMode:startSpectate(playerIndex)
+    self.lastPlayer.lastPositionX, self.lastPlayer.lastPositionY, self.lastPlayer.lastPositionZ = getTranslation(g_currentMission.player.graphicsRootNode)
     g_currentMission.player.pickedUpObjectOverlay:setIsVisible(false)
     g_currentMission.isPlayerFrozen = true
     self.lastPlayer.lightNode = g_currentMission.player.lightNode
@@ -296,7 +306,7 @@ function SpectatorMode:startSpectate(playerIndex)
     self.lastPlayer.mmState = g_currentMission.hud.ingameMap.state
     self.spectateFadeEffect:play(self.spectatedPlayer)
     self.spectating = true
-    --g_currentMission.player:onLeave()
+    --g_currentMission.player:onLeave() --TODO: Qualcosa bugga la camera dei veicoli...
 end
 
 function SpectatorMode:stopSpectate(disconnect)
@@ -312,6 +322,12 @@ function SpectatorMode:stopSpectate(disconnect)
     end
     self.spectatedPlayerObject:setVisibility(true)
     self.spectatedPlayerObject:setWoodWorkVisibility(true, true)
+    if self.spectatedVehicle ~= nil then
+        g_currentMission.player:moveToExitPoint(self.spectatedVehicle)
+    else
+        local x, y, z = getTranslation(self.spectatedPlayerObject.rootNode)
+        g_currentMission.player:moveToAbsoluteInternal(x, y, z)
+    end
     self.spectatedPlayer = nil
     self.spectatedPlayerIndex = nil
     self.spectatedPlayerObject = nil
@@ -319,6 +335,7 @@ function SpectatorMode:stopSpectate(disconnect)
     g_currentMission.player.pickedUpObjectOverlay:setIsVisible(true)
     g_currentMission.isPlayerFrozen = false
     g_currentMission.player.lightNode = self.lastPlayer.lightNode -- enable ability to toggle player light
+    --setTranslation(self.lastPlayer.lastPositionX, self.lastPlayer.lastPositionY, self.lastPlayer.lastPositionZ)
     --g_currentMission.player:onEnter()
 end
 
@@ -360,10 +377,12 @@ function SpectatorMode:delayedCameraChanged(actorName, cameraId, cameraIndex, ca
         self.spectatedVehicle = nil
         self.spectatedPlayerObject.skipNextInterpolationAlpha = true
         self.spectatedPlayerObject.interpolationAlpha = 1
+        --VehicleSchemaDisplay:setVehicle(nil)
+        --SpeedMeterDisplay:setVehicle(nil)
     elseif cameraType == CameraChangeEvent.CAMERA_TYPE_VEHICLE then
-        --print("g_currentMission.controlledVehicles start")
-        --DebugUtil.printTableRecursively(g_currentMission.controlledVehicles, "", 0, 1)
-        --print("g_currentMission.controlledVehicles end")
+        print("g_currentMission.controlledVehicles start")
+        DebugUtil.printTableRecursively(g_currentMission.controlledVehicles, "", 0, 1)
+        print("g_currentMission.controlledVehicles end")
         for _, v in pairs(g_currentMission.controlledVehicles) do
             --print("v:getControllerName() " .. tostring(v:getControllerName()) .. " actorName " .. actorName)
             if v:getControllerName() == actorName then
@@ -372,8 +391,11 @@ function SpectatorMode:delayedCameraChanged(actorName, cameraId, cameraIndex, ca
                 v.spec_enterable.vehicleCharacter:setCharacterVisibility(true)
                 self.spectatedVehicle = v
                 self:setVehicleActiveCamera(cameraIndex)
+                --VehicleSchemaDisplay:setVehicle(v)
+                --SpeedMeterDisplay:setVehicle(v)
                 spec.camerasLerp[v.spec_enterable.cameras[cameraIndex].cameraNode].skipNextInterpolationAlpha = true
                 spec.camerasLerp[v.spec_enterable.cameras[cameraIndex].cameraNode].interpolationAlpha = 1
+                --g_currentMission.hud:showVehicleName(v)
             end
         end
     elseif cameraType == CameraChangeEvent.CAMERA_TYPE_VEHICLE_INDOOR then
@@ -387,6 +409,8 @@ function SpectatorMode:delayedCameraChanged(actorName, cameraId, cameraIndex, ca
                 v.spec_enterable.vehicleCharacter:setCharacterVisibility(false)
                 self.spectatedVehicle = v
                 self:setVehicleActiveCamera(cameraIndex)
+                --VehicleSchemaDisplay:setVehicle(v)
+                --SpeedMeterDisplay:setVehicle(v)
                 spec.camerasLerp[v.spec_enterable.cameras[cameraIndex].cameraNode].skipNextInterpolationAlpha = true
                 spec.camerasLerp[v.spec_enterable.cameras[cameraIndex].cameraNode].interpolationAlpha = 1
             end
@@ -441,7 +465,10 @@ end
 function SpectatorMode:onConnectionClosed(connection)
     -- check left user
     print("onConnectionClosed()")
-    for _, oldUser in pairs(g_spectatorMode.usersOld) do
+    print("self.server.clients start")
+    DebugUtil.printTableRecursively(self.server.clients, "", 0, 3)
+    print("self.server.clients end")
+--[[    for _, oldUser in pairs(g_spectatorMode.usersOld) do
         print(oldUser.nickname)
         local found = false
         for _, user in pairs(g_currentMission.userManager.users) do
@@ -459,5 +486,5 @@ function SpectatorMode:onConnectionClosed(connection)
                 g_spectatorMode:stopSpectate(true)
             end
         end
-    end
+    end]]
 end

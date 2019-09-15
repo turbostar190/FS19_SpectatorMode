@@ -4,26 +4,26 @@
 -- @author *TurboStar*
 -- @date 01/09/2019
 
-vehicleExtensionsSpec = {}
+SMVehicle = {}
 
-function vehicleExtensionsSpec.prerequisitesPresent(specializations)
+function SMVehicle.prerequisitesPresent(specializations)
     return SpecializationUtil.hasSpecialization(Enterable, specializations)
 end
 
-function vehicleExtensionsSpec.registerEvents(vehicleType)
+function SMVehicle.registerEvents(vehicleType)
 end
 
-function vehicleExtensionsSpec.registerFunctions(vehicleType)
-    SpecializationUtil.registerFunction(vehicleType, "isSpectated", vehicleExtensionsSpec.isSpectated)
+function SMVehicle.registerFunctions(vehicleType)
+    SpecializationUtil.registerFunction(vehicleType, "getIsSpectated", SMVehicle.getIsSpectated)
 end
 
-function vehicleExtensionsSpec.registerOverwrittenFunctions(vehicleType)
-    SpecializationUtil.registerOverwrittenFunction(vehicleType, "drawUIInfo", vehicleExtensionsSpec.drawUIInfo)
-    SpecializationUtil.registerOverwrittenFunction(vehicleType, "addToolCameras", vehicleExtensionsSpec.addToolCameras)
-    SpecializationUtil.registerOverwrittenFunction(vehicleType, "removeToolCameras", vehicleExtensionsSpec.removeToolCameras)
+function SMVehicle.registerOverwrittenFunctions(vehicleType)
+    SpecializationUtil.registerOverwrittenFunction(vehicleType, "drawUIInfo", SMVehicle.drawUIInfo)
+    SpecializationUtil.registerOverwrittenFunction(vehicleType, "addToolCameras", SMVehicle.addToolCameras)
+    SpecializationUtil.registerOverwrittenFunction(vehicleType, "removeToolCameras", SMVehicle.removeToolCameras)
 end
 
-function vehicleExtensionsSpec.registerEventListeners(vehicleType)
+function SMVehicle.registerEventListeners(vehicleType)
     local events = { "onPostLoad",
                      "onUpdateInterpolation",
                      "onReadUpdateStream",
@@ -32,7 +32,7 @@ function vehicleExtensionsSpec.registerEventListeners(vehicleType)
                      "onAIStart",
                      "onAIEnd" }
     for _, event in pairs(events) do
-        SpecializationUtil.registerEventListener(vehicleType, event, vehicleExtensionsSpec)
+        SpecializationUtil.registerEventListener(vehicleType, event, SMVehicle)
     end
 end
 
@@ -40,7 +40,7 @@ local function isMultiplayer()
     return g_currentMission.missionDynamicInfo.isMultiplayer
 end
 
-function vehicleExtensionsSpec:onPostLoad(savegame)
+function SMVehicle:onPostLoad(savegame)
     if not isMultiplayer() then return end
     local spec = self:spectatorMode_getSpecTable()
 
@@ -57,7 +57,7 @@ function vehicleExtensionsSpec:onPostLoad(savegame)
 end
 
 -- https://gdn.giants-software.com/documentation_scripting_fs19.php?version=script&category=69&class=10618#update168138
-function vehicleExtensionsSpec:onUpdateInterpolation(dt, isActiveForInput, isActiveForInputIgnoreSelection, isSelected)
+function SMVehicle:onUpdateInterpolation(dt, isActiveForInput, isActiveForInputIgnoreSelection, isSelected)
     local isControlled = self.getIsControlled ~= nil and self:getIsControlled()
     if not isMultiplayer() or not isControlled then return end
 
@@ -126,12 +126,12 @@ function vehicleExtensionsSpec:onUpdateInterpolation(dt, isActiveForInput, isAct
     end
 end
 
-function vehicleExtensionsSpec:onWriteUpdateStream(streamId, connection)
+function SMVehicle:onWriteUpdateStream(streamId, connection)
     if not isMultiplayer() then return end
-    local spec = self:spectatorMode_getSpecTable()
-    local specE = self.spec_enterable
 
     --if not connection:getIsServer() then
+    local spec = self:spectatorMode_getSpecTable()
+    local specE = self.spec_enterable
         if self.isServer and not specE.isEntered then
             for _, v in pairs(specE.cameras) do
                 streamWriteFloat32(streamId, spec.camerasLerp[v.cameraNode].targetQuaternion[1])
@@ -158,11 +158,11 @@ function vehicleExtensionsSpec:onWriteUpdateStream(streamId, connection)
     --end
 end
 
-function vehicleExtensionsSpec:onReadUpdateStream(streamId, timestamp, connection)
+function SMVehicle:onReadUpdateStream(streamId, timestamp, connection)
     if not isMultiplayer() then return end
-    local spec = self:spectatorMode_getSpecTable()
 
     --if connection:getIsServer() then
+    local spec = self:spectatorMode_getSpecTable()
         for _, v in pairs(self.spec_enterable.cameras) do
             local x, y, z, w, tx, ty, tz = 0
             x = streamReadFloat32(streamId)
@@ -190,10 +190,9 @@ end
 --### is changed. This event is raised by the Enterable specialization in the
 --### setActiveCameraIndex function.
 --#######################################################################################
-function vehicleExtensionsSpec:onCameraChanged(activeCamera, camIndex)
+function SMVehicle:onCameraChanged(activeCamera, camIndex)
     if not isMultiplayer() then return end
     print("spec onCameraChanged - camIndex: " .. camIndex)
-    --local spec = self:spectatorMode_getSpecTable()
 
     if not g_spectatorMode.spectating then
         local cameraType = CameraChangeEvent.CAMERA_TYPE_VEHICLE
@@ -205,30 +204,32 @@ function vehicleExtensionsSpec:onCameraChanged(activeCamera, camIndex)
     end
 end
 
-function vehicleExtensionsSpec:isSpectated()
+function SMVehicle:getIsSpectated()
     if not isMultiplayer() then return end
 
-    if g_spectatorMode ~= nil then
-        if g_spectatorMode.spectating and g_currentMission.player.visualInformation.playerName == g_spectatorMode.spectatedPlayer then
+    if g_spectatorMode ~= nil and self.getControllerName ~= nil then
+        if g_spectatorMode.spectating and self:getControllerName() == g_spectatorMode.spectatedPlayer then
             return true
         end
     end
     return false
 end
 
-function vehicleExtensionsSpec:drawUIInfo(superFunc)
-    if not isMultiplayer() then return superFunc(self) end
-
-    local spec = self:spectatorMode_getSpecTable()
-
+function SMVehicle:drawUIInfo(superFunc)
     if superFunc ~= nil then
         superFunc(self)
     end
+    if not isMultiplayer() then return end
 
-    local spectated = self.isSpectated ~= nil
+    local spec = self:spectatorMode_getSpecTable()
+
+    local spectated = self.getIsSpectated ~= nil
     if spectated then
-        spectated = self:isSpectated()
+        spectated = self:getIsSpectated()
     end
+
+    -- TODO: 2019-09-15 16:39 Error: Running LUA method 'draw'.
+    -- 2019-09-15 16:39 dataS/scripts/vehicles/specializations/Enterable.lua(1092) : attempt to index field 'playerStyle' (a nil value)
 
     if (not spec.isEntered and not spectated) and self.isClient and self:getIsActive() and spec.isControlled and not g_gui:getIsGuiVisible() and not g_flightAndNoHUDKeysEnabled then
         local x, y, z = getWorldTranslation(spec.nicknameRendering.node)
@@ -243,15 +244,15 @@ function vehicleExtensionsSpec:drawUIInfo(superFunc)
     end
 end
 
-function vehicleExtensionsSpec:addToolCameras(superFunc, cameras)
-    print("vehicleExtensionsSpec:addToolCameras()")
-    if not isMultiplayer() then return superFunc(self, cameras) end
-
-    local spec = self:spectatorMode_getSpecTable()
-
+function SMVehicle:addToolCameras(superFunc, cameras)
+    print("SMVehicle:addToolCameras()")
     if superFunc ~= nil then
         superFunc(self, cameras)
     end
+    if not isMultiplayer() then return end
+
+    local spec = self:spectatorMode_getSpecTable()
+
     for _, v in pairs(cameras) do
         spec.camerasLerp[v.cameraNode] = {}
         spec.camerasLerp[v.cameraNode].lastQuaternion = { 0, 0, 0, 0 }
@@ -263,37 +264,38 @@ function vehicleExtensionsSpec:addToolCameras(superFunc, cameras)
     end
 end
 
-function vehicleExtensionsSpec:removeToolCameras(superFunc, cameras)
-    print("vehicleExtensionsSpec:removeToolCameras()")
-    if not isMultiplayer() then return superFunc(self, cameras) end
-
-    local spec = self:spectatorMode_getSpecTable()
-
+function SMVehicle:removeToolCameras(superFunc, cameras)
+    print("SMVehicle:removeToolCameras()")
     if superFunc ~= nil then
         superFunc(self, cameras)
     end
+    if not isMultiplayer() then return end
+
+    local spec = self:spectatorMode_getSpecTable()
+
     for _, v in pairs(cameras) do
         spec.camerasLerp[v.cameraNode] = nil
     end
 end
 
-function vehicleExtensionsSpec:onAIStart()
+--TODO: Con AI inserita e guardata a piedi attraverso la spectator lo sterzo non ruota. Dovrebbe esserci una soluzione nella passenger mod
+function SMVehicle:onAIStart()
     if not isMultiplayer() then return end
 
     local spec = self.spec_enterable
-    print("AIVehicleExtensions:onStartAiVehicle self:isSpectated() " .. tostring(self:isSpectated()) .. " spec.activeCamera.isInside " .. tostring(spec.activeCamera.isInside))
-    if self:isSpectated() and spec.activeCamera.isInside then
+    print("AIVehicleExtensions:onStartAiVehicle self:getIsSpectated() " .. tostring(self:getIsSpectated()) .. " spec.activeCamera.isInside " .. tostring(spec.activeCamera.isInside))
+    if self:getIsSpectated() and spec.activeCamera.isInside then
         --self:getActiveCamera()
         spec.vehicleCharacter:setCharacterVisibility(false) --TODO: Switch to getAllowCharacterVisibilityUpdate overwritten function
     end
 end
 
-function vehicleExtensionsSpec:onAIEnd()
+function SMVehicle:onAIEnd()
     if not isMultiplayer() then return end
 
     local spec = self.spec_enterable
-    print("AIVehicleExtensions:onStopAiVehicle self:isSpectated() " .. tostring(self:isSpectated()) .. " spec.activeCamera.isInside " .. tostring(spec.activeCamera.isInside))
-    if self:isSpectated() and spec.activeCamera.isInside then
+    print("AIVehicleExtensions:onStopAiVehicle self:getIsSpectated() " .. tostring(self:getIsSpectated()) .. " spec.activeCamera.isInside " .. tostring(spec.activeCamera.isInside))
+    if self:getIsSpectated() and spec.activeCamera.isInside then
         spec.vehicleCharacter:setCharacterVisibility(false)
     end
 end

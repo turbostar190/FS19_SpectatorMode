@@ -4,16 +4,15 @@
 -- @author TyKonKet
 -- @date 04/01/2017
 
+--local name = "SpectatorModeRecorder"
 local modDirectory = g_currentModDirectory
 local modName = g_currentModName
---local name = "SpectatorModeRecorder"
 local debugActive = true
 
 source(modDirectory .. "spectatorMode.lua")
 source(modDirectory .. "spectatorModeServer.lua")
 source(modDirectory .. "extensions/extensions.lua")
 source(modDirectory .. "extensions/playerExtensions.lua")
-source(modDirectory .. "extensions/vehicleExtensions.lua")
 source(modDirectory .. "guis/spectateGui.lua")
 source(modDirectory .. "events/cameraChangeEvent.lua")
 source(modDirectory .. "events/minimapChangeEvent.lua")
@@ -71,16 +70,16 @@ end
 function startMission(mission)
     if not isActive() then return end
 
-    spectatorMode:onMissionStart(mission)
+    --spectatorMode:onMissionStart(mission)
 end
 
 init()
 
 function Vehicle:spectatorMode_getSpecTable()
-    local spec = self["spec_" .. modName .. ".SMVehicle"]
+    local spec = self["spec_" .. modName .. ".SMV"]
     if spec ~= nil then
         return spec
     end
 
-    return self["spec_SMVehicle"]
+    return self["spec_" .. name]
 end

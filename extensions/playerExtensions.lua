@@ -85,8 +85,8 @@ end
 
 function PlayerExtensions:drawUIInfo(superFunc)
     local spectated
-    if self.isSpectated ~= nil then
-        spectated = self:isSpectated()
+    if self.getIsSpectated ~= nil then
+        spectated = self:getIsSpectated()
     end
     if not spectated then
         superFunc(self)
@@ -136,7 +136,7 @@ function PlayerExtensions:getPositionData(superFunc)
     return superFunc(self)
 end
 
-function PlayerExtensions:isSpectated()
+function Player:getIsSpectated()
     if g_spectatorMode ~= nil then
         if g_spectatorMode.spectating and self.visualInformation.playerName == g_spectatorMode.spectatedPlayer then
             return true
