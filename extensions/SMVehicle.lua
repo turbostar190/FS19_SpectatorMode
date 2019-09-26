@@ -14,7 +14,7 @@ function SMVehicle.registerEvents(vehicleType)
 end
 
 function SMVehicle.registerFunctions(vehicleType)
-    SpecializationUtil.registerFunction(vehicleType, "getIsSpectated", SMVehicle.getIsSpectated)
+    SpecializationUtil.registerFunction(vehicleType, "getVehIsSpectated", SMVehicle.getVehIsSpectated)
 end
 
 function SMVehicle.registerOverwrittenFunctions(vehicleType)
@@ -25,7 +25,8 @@ end
 
 function SMVehicle.registerEventListeners(vehicleType)
     local events = { "onPostLoad",
-                     "onUpdateInterpolation",
+                     --"onUpdateInterpolation",
+                     "onUpdate",
                      "onReadUpdateStream",
                      "onWriteUpdateStream",
                      "onCameraChanged",
@@ -57,7 +58,7 @@ function SMVehicle:onPostLoad(savegame)
 end
 
 -- https://gdn.giants-software.com/documentation_scripting_fs19.php?version=script&category=69&class=10618#update168138
-function SMVehicle:onUpdateInterpolation(dt, isActiveForInput, isActiveForInputIgnoreSelection, isSelected)
+function SMVehicle:onUpdate(dt, isActiveForInput, isActiveForInputIgnoreSelection, isSelected)
     local isControlled = self.getIsControlled ~= nil and self:getIsControlled()
     if not isMultiplayer() or not isControlled then return end
 
@@ -204,11 +205,12 @@ function SMVehicle:onCameraChanged(activeCamera, camIndex)
     end
 end
 
-function SMVehicle:getIsSpectated()
+function SMVehicle:getVehIsSpectated()
     if not isMultiplayer() then return end
 
-    if g_spectatorMode ~= nil and self.getControllerName ~= nil then
-        if g_spectatorMode.spectating and self:getControllerName() == g_spectatorMode.spectatedPlayer then
+    if g_spectatorMode ~= nil and self.spectatedVehicle ~= nil then
+        --if g_spectatorMode.spectating and self:getControllerName() == g_spectatorMode.spectatedPlayer then
+        if g_spectatorMode.spectating and self == g_spectatorMode.spectatedVehicle then
             return true
         end
     end
@@ -223,9 +225,9 @@ function SMVehicle:drawUIInfo(superFunc)
 
     local spec = self:spectatorMode_getSpecTable()
 
-    local spectated = self.getIsSpectated ~= nil
+    local spectated = self.getVehIsSpectated ~= nil
     if spectated then
-        spectated = self:getIsSpectated()
+        spectated = self:getVehIsSpectated()
     end
 
     -- TODO: 2019-09-15 16:39 Error: Running LUA method 'draw'.
@@ -283,8 +285,8 @@ function SMVehicle:onAIStart()
     if not isMultiplayer() then return end
 
     local spec = self.spec_enterable
-    print("AIVehicleExtensions:onStartAiVehicle self:getIsSpectated() " .. tostring(self:getIsSpectated()) .. " spec.activeCamera.isInside " .. tostring(spec.activeCamera.isInside))
-    if self:getIsSpectated() and spec.activeCamera.isInside then
+    print("AIVehicleExtensions:onStartAiVehicle self:getVehIsSpectated() " .. tostring(self:getVehIsSpectated()) .. " spec.activeCamera.isInside " .. tostring(spec.activeCamera.isInside))
+    if self:getVehIsSpectated() and spec.activeCamera.isInside then
         --self:getActiveCamera()
         spec.vehicleCharacter:setCharacterVisibility(false) --TODO: Switch to getAllowCharacterVisibilityUpdate overwritten function
     end
@@ -294,8 +296,8 @@ function SMVehicle:onAIEnd()
     if not isMultiplayer() then return end
 
     local spec = self.spec_enterable
-    print("AIVehicleExtensions:onStopAiVehicle self:getIsSpectated() " .. tostring(self:getIsSpectated()) .. " spec.activeCamera.isInside " .. tostring(spec.activeCamera.isInside))
-    if self:getIsSpectated() and spec.activeCamera.isInside then
+    print("AIVehicleExtensions:onStopAiVehicle self:getVehIsSpectated() " .. tostring(self:getVehIsSpectated()) .. " spec.activeCamera.isInside " .. tostring(spec.activeCamera.isInside))
+    if self:getVehIsSpectated() and spec.activeCamera.isInside then
         spec.vehicleCharacter:setCharacterVisibility(false)
     end
 end

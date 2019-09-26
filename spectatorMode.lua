@@ -73,12 +73,32 @@ function SpectatorMode:new(mission, i18n, modDirectory, gui, inputManager, dedic
     --Player.isSpectated = PlayerExtensions.isSpectated
 
     -- Misc
-    FSBaseMission.onConnectionClosed = Utils.prependedFunction(FSBaseMission.onConnectionClosed, self.onConnectionClosed)
     BaseMission.requestToEnterVehicle = Utils.overwrittenFunction(BaseMission.requestToEnterVehicle, self.requestToEnterVehicle)
     IngameMap.toggleSize = Utils.overwrittenFunction(IngameMap.toggleSize, self.toggleSize)
 
+    --g_messageCenter:subscribe(MessageType.USER_ADDED, self.onUserAdded, self)
+    g_messageCenter:subscribe(MessageType.USER_REMOVED, self.onUserRemoved, self)
+    --g_messageCenter:subscribe(MessageType.PLAYER_CREATED, self.onPlayerCreated, self)
+
     return self
 end
+
+--[[function SpectatorMode:onUserAdded(player)
+    print("onUserAdded")
+    print("onUserAdded end")
+end]]
+function SpectatorMode:onUserRemoved(player)
+    print("onUserRemoved playername: " .. tostring(player.visualInformation.playerName) .. "g_player " .. tostring(g_spectatorMode.spectatedPlayer))
+    print("spectating " .. tostring(g_spectatorMode.spectating))
+    if g_spectatorMode.spectating and player.visualInformation.playerName == g_spectatorMode.spectatedPlayer then
+        g_spectatorMode:stopSpectate(true)
+    end
+    print("onUserRemoved end")
+end
+--[[function SpectatorMode:onPlayerCreated(player)
+    print("onPlayerCreated")
+    print("onPlayerCreated end")
+end]]
 
 function SpectatorMode:print(text, ...)
     if self.debug then
@@ -124,8 +144,8 @@ function SpectatorMode:registerActionEvents()
         --_, g_spectatorMode.smSwitchActorNext = g_inputBinding:registerActionEvent(InputAction.SM_SWITCH_ACTOR_NEXT, g_spectatorMode, g_spectatorMode.startSpectateNextActionEvent, false, true, false, false)
         --_, g_spectatorMode.smSwitchActorPrevious = g_inputBinding:registerActionEvent(InputAction.SM_SWITCH_ACTOR_PREVIOUS, g_spectatorMode, g_spectatorMode.startSpectatePreviousActionEvent, false, true, false, false)
         --self:print(string.format("smToggle: %s , smSwitchActorNext: %s , smSwitchActorPrevious: %s", tostring(g_spectatorMode.smToggle), tostring(g_spectatorMode.smSwitchActorNext), tostring(g_spectatorMode.smSwitchActorPrevious)))
+        end
     end
-end
 
 function SpectatorMode:inj_fsBaseMission_registerActionEvents()
     --print("inj_fsBaseMission_registerActionEvents")
@@ -147,6 +167,18 @@ function SpectatorMode:toggleActionEvent()
 end
 
 function SpectatorMode:showGui()
+--[[    print("MessageType start")
+    local t = MessageType
+    DebugUtil.printTableRecursively(t, "", 0, 3)
+
+    print("addonuser start")
+    if g_currentMission.addOnUserEventCallback ~= nil then
+        print("addonuser ok")
+    else
+        print("addonuser nil")
+    end
+    print("addonuser end")]]
+
     self.spectateGui:setSpectableUsers(self:getSpectableUsers())
     if not self.mission.isSynchronizingWithPlayers then
         self.gui:showDialog("SpectateGui")
@@ -290,11 +322,12 @@ function SpectatorMode:draw()
 end
 
 function SpectatorMode:startSpectate(playerIndex)
-    self.lastPlayer.lastPositionX, self.lastPlayer.lastPositionY, self.lastPlayer.lastPositionZ = getTranslation(g_currentMission.player.graphicsRootNode)
+    --self.lastPlayer.lastPositionX, self.lastPlayer.lastPositionY, self.lastPlayer.lastPositionZ = getTranslation(g_currentMission.player.graphicsRootNode)
     g_currentMission.player.pickedUpObjectOverlay:setIsVisible(false)
     g_currentMission.isPlayerFrozen = true
     self.lastPlayer.lightNode = g_currentMission.player.lightNode
     g_currentMission.player.lightNode = nil -- disable ability to toggle player light
+    self.spectating = true
     self.spectatedPlayer = self:getSpectableUsers()[playerIndex]
     self.spectatedPlayerIndex = playerIndex
     self.spectatedPlayerObject = g_currentMission:getPlayerByName(self.spectatedPlayer)
@@ -305,13 +338,11 @@ function SpectatorMode:startSpectate(playerIndex)
     Event.sendToServer(SpectateEvent:new(true, g_currentMission.player.visualInformation.playerName, self.spectatedPlayer))
     self.lastPlayer.mmState = g_currentMission.hud.ingameMap.state
     self.spectateFadeEffect:play(self.spectatedPlayer)
-    self.spectating = true
-    --g_currentMission.player:onLeave() --TODO: Qualcosa bugga la camera dei veicoli...
+    --g_currentMission.player:onLeave()
 end
 
 function SpectatorMode:stopSpectate(disconnect)
     --TODO: Detach camera where event happens. Now it follows player still after stopping spectate
-    self.spectating = false
     g_currentMission.hud.ingameMap:toggleSize(self.lastPlayer.mmState, true)
     g_currentMission.hasSpecialCamera = false
     self:setVehicleActiveCamera(nil)
@@ -320,23 +351,24 @@ function SpectatorMode:stopSpectate(disconnect)
     if not disconnect then
         self.delayedStopSpectateDCB:call(100, self.spectatedPlayerObject, self.spectatedVehicle)
     end
-    self.spectatedPlayerObject:setVisibility(true)
+    --self.spectatedPlayerObject:setVisibility(true)
     self.spectatedPlayerObject:setWoodWorkVisibility(true, true)
-    if self.spectatedVehicle ~= nil then
+--[[    if self.spectatedVehicle ~= nil then
         g_currentMission.player:moveToExitPoint(self.spectatedVehicle)
     else
         local x, y, z = getTranslation(self.spectatedPlayerObject.rootNode)
         g_currentMission.player:moveToAbsoluteInternal(x, y, z)
-    end
-    self.spectatedPlayer = nil
-    self.spectatedPlayerIndex = nil
+    end]]
     self.spectatedPlayerObject = nil
+    self.spectatedPlayer = nil
+    --self.spectatedPlayerIndex = nil
     self.spectatedVehicle = nil
     g_currentMission.player.pickedUpObjectOverlay:setIsVisible(true)
     g_currentMission.isPlayerFrozen = false
     g_currentMission.player.lightNode = self.lastPlayer.lightNode -- enable ability to toggle player light
     --setTranslation(self.lastPlayer.lastPositionX, self.lastPlayer.lastPositionY, self.lastPlayer.lastPositionZ)
     --g_currentMission.player:onEnter()
+    self.spectating = false
 end
 
 function SpectatorMode:spectateRejected(reason)
@@ -459,32 +491,4 @@ function SpectatorMode:requestToEnterVehicle(superFunc, vehicle)
             superFunc(self, vehicle)
         end
     end
-end
-
--- TODO: Trovare chi si disconnette
-function SpectatorMode:onConnectionClosed(connection)
-    -- check left user
-    print("onConnectionClosed()")
-    print("self.server.clients start")
-    DebugUtil.printTableRecursively(self.server.clients, "", 0, 3)
-    print("self.server.clients end")
---[[    for _, oldUser in pairs(g_spectatorMode.usersOld) do
-        print(oldUser.nickname)
-        local found = false
-        for _, user in pairs(g_currentMission.userManager.users) do
-            -- UserManager:getUsers()
-            if oldUser.userId == user.userId then
-                --user:getId()
-                found = true
-                break
-            end
-        end
-        if not found and oldUser.userId ~= g_currentMission:getServerUserId() and UserManager:getUserByNickname(oldUser.nickname)[userId] then
-            --and oldUser.userId ~= self.playerUserId
-            if g_spectatorMode.spectating and oldUser.nickname == g_spectatorMode.spectatedPlayer then
-                print(tostring(oldUser.nickname) .. " disconnected. Stop spectating it.")
-                g_spectatorMode:stopSpectate(true)
-            end
-        end
-    end]]
 end
