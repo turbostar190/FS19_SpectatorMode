@@ -49,6 +49,7 @@ function SpectateGui:onClose()
 	SpectateGui:superClass().onClose(self)
 end
 
+--TODO: Non funziona il tasto invio
 function SpectateGui:onClickActivate()
 	SpectateGui:superClass().onClickActivate(self)
 	if self.areButtonsDisabled then

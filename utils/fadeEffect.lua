@@ -81,7 +81,6 @@ function FadeEffect:setText(text)
 end
 
 function FadeEffect:play(text)
-    print("FadeEffect:play() text: " .. tostring(text))
     if text ~= nil then
         self.settings.text = text
         self:alignText()

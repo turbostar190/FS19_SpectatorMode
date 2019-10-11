@@ -33,7 +33,6 @@ function init()
     FSBaseMission.delete = Utils.appendedFunction(FSBaseMission.delete, unload)
 
     Mission00.load = Utils.prependedFunction(Mission00.load, load)
-    Mission00.onStartMission = Utils.appendedFunction(Mission00.onStartMission, startMission)
 
     VehicleTypeManager.validateVehicleTypes = Utils.prependedFunction(VehicleTypeManager.validateVehicleTypes, validateVehicleTypes)
 end
@@ -64,13 +63,6 @@ function unload()
         spectatorMode = nil -- Allows garbage collecting
         getfenv(0)["g_spectatorMode"] = nil
     end
-end
-
--- Player clicked on start
-function startMission(mission)
-    if not isActive() then return end
-
-    --spectatorMode:onMissionStart(mission)
 end
 
 init()

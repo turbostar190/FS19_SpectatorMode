@@ -298,11 +298,11 @@
             <nl>Er zijn geen spelers om te volgen</nl>
             <pl>Nie ma graczy, których możesz podglądać</pl>
         </text>
-        <text name="SM_ERROR_SPCTATE_DEDICATED_SERVER">
+        <text name="SM_ERROR_SPECTATE_DEDICATED_SERVER">
             <en>You can't spectate the dedicated server's player</en>
             <pl>Nie możesz podglądać graczy na serwerze dedykowanym!!</pl>
         </text>
-        <text name="SM_ERROR_SPCTATE_YOURSELF">
+        <text name="SM_ERROR_SPECTATE_YOURSELF">
             <en>You can't spectate yourself!</en>
             <pl>Nie możesz podglądać samego siebie!!</pl>
             <it>Non puoi guardare te stesso!</it>

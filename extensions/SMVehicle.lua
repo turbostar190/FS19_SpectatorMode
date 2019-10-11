@@ -186,11 +186,9 @@ function SMVehicle:onReadUpdateStream(streamId, timestamp, connection)
     --end
 end
 
---#######################################################################################
---### Callback for the onCameraChanged event, which is triggered when the active camera
---### is changed. This event is raised by the Enterable specialization in the
---### setActiveCameraIndex function.
---#######################################################################################
+-- Callback for the onCameraChanged event, which is triggered when the active camera
+-- is changed. This event is raised by the Enterable specialization in the
+-- setActiveCameraIndex function.
 function SMVehicle:onCameraChanged(activeCamera, camIndex)
     if not isMultiplayer() then return end
     print("spec onCameraChanged - camIndex: " .. camIndex)
@@ -229,9 +227,6 @@ function SMVehicle:drawUIInfo(superFunc)
     if spectated then
         spectated = self:getVehIsSpectated()
     end
-
-    -- TODO: 2019-09-15 16:39 Error: Running LUA method 'draw'.
-    -- 2019-09-15 16:39 dataS/scripts/vehicles/specializations/Enterable.lua(1092) : attempt to index field 'playerStyle' (a nil value)
 
     if (not spec.isEntered and not spectated) and self.isClient and self:getIsActive() and spec.isControlled and not g_gui:getIsGuiVisible() and not g_flightAndNoHUDKeysEnabled then
         local x, y, z = getWorldTranslation(spec.nicknameRendering.node)
