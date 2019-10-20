@@ -10,9 +10,6 @@ function SMVehicle.prerequisitesPresent(specializations)
     return SpecializationUtil.hasSpecialization(Enterable, specializations)
 end
 
-function SMVehicle.registerEvents(vehicleType)
-end
-
 function SMVehicle.registerFunctions(vehicleType)
     SpecializationUtil.registerFunction(vehicleType, "getVehIsSpectated", SMVehicle.getVehIsSpectated)
 end
@@ -123,6 +120,33 @@ function SMVehicle:onUpdate(dt, isActiveForInput, isActiveForInputIgnoreSelectio
             end
             local wtx, wty, wtz = getWorldTranslation(v.cameraPositionNode)
             setTranslation(v.cameraNode, wtx, wty, wtz)
+        end
+    end
+
+    --TODO: Con AI inserita e guardata a piedi attraverso la spectator lo sterzo non ruota. Dovrebbe esserci una soluzione nella passenger mod
+    -- This is needed as the Drivable.lua only shows this for the person who is the vehicle.
+    if self.spec_drivable ~= nil and self:getIsAIActive() then
+        self:doSteeringWheelUpdate(self.spec_drivable.steeringWheel, dt, 1)
+    end
+    self:raiseActive() -- ??
+end
+
+function SMVehicle:doSteeringWheelUpdate(steeringWheel, dt, direction)
+    if steeringWheel ~= nil then
+        local maxRotation = steeringWheel.outdoorRotation
+        local activeCamera = self.spec_universalPassenger.activeCamera
+        if activeCamera ~= nil and self.spec_enterable.activeCamera.isInside then
+            maxRotation = steeringWheel.indoorRotation
+        end
+
+        if self.rotatedTime == nil then
+            self.rotatedTime = 0
+        end
+
+        local rotation = self.rotatedTime * maxRotation
+        if steeringWheel.lastRotation ~= rotation then
+            steeringWheel.lastRotation = rotation
+            setRotation(steeringWheel.node, 0, rotation * direction, 0)
         end
     end
 end
@@ -275,7 +299,6 @@ function SMVehicle:removeToolCameras(superFunc, cameras)
     end
 end
 
---TODO: Con AI inserita e guardata a piedi attraverso la spectator lo sterzo non ruota. Dovrebbe esserci una soluzione nella passenger mod
 function SMVehicle:onAIStart()
     if not isMultiplayer() then return end
 

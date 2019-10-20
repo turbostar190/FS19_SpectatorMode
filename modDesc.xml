@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<modDesc descVersion="45">
+<modDesc descVersion="47">
     <author>*TurboStar*, Tykonket</author>
     <version>1.0.0.0</version>
     <title>
@@ -16,7 +16,7 @@
     <iconFilename>icon.png</iconFilename>
     <multiplayer supported="true" />
     <extraSourceFiles>
-        <sourceFile filename="spectatorModeRecorder.lua" />
+        <sourceFile filename="spectatorModeLoader.lua" />
     </extraSourceFiles>
 
     <actions>

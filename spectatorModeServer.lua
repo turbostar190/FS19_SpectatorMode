@@ -32,7 +32,7 @@ function SpectatorModeServer:addSubscriber(sName, connection, aName)
         return
     end
     if sName == aName then
-        self:print("SpectateRejectedEvent:new(SpectateRejectedEvent.REASON_YOURSELF)")
+        self:print("    SpectateRejectedEvent:new(SpectateRejectedEvent.REASON_YOURSELF)")
         connection:sendEvent(SpectateRejectedEvent:new(SpectateRejectedEvent.REASON_YOURSELF))
         return
     end

@@ -122,14 +122,14 @@ function PlayerExtensions:getPositionData(superFunc)
             end
 
             return posX, posY, posZ, yRot
-        else
+--[[        else
             local pl = g_spectatorMode.spectatedPlayerObject
             local posX, posY, posZ = getTranslation(pl.rootNode)
             if pl.isClient and pl.isControlled and pl.isEntered then
                 return posX, posY, posZ, pl.rotY
             else
                 return posX, posY, posZ, pl.graphicsRotY
-            end
+            end]]
         end
     end
 

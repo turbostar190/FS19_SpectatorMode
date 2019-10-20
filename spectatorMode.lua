@@ -82,7 +82,7 @@ end
 
 function SpectatorMode:print(text, ...)
     if self.debug then
-        local pre = "[A]"
+        local pre = "[ ]"
         if self.spectating then
             pre = "[S]"
         end
@@ -99,7 +99,7 @@ function SpectatorMode.installSpecialization(vehicleTypeManager, specializationM
 
     for typeName, typeEntry in pairs(vehicleTypeManager:getVehicleTypes()) do
         if SpecializationUtil.hasSpecialization(Enterable, typeEntry.specializations) then
-            vehicleTypeManager:addSpecialization(typeName, modName .. ".SMV") --TODO: Spec is register with prefix modName... change to spec_SMV
+            vehicleTypeManager:addSpecialization(typeName, modName .. ".SMV") --TODO: Spec is registestered with prefix modName... change to spec_SMV
         end
     end
 end
@@ -319,11 +319,11 @@ function SpectatorMode:delayedCameraChanged(actorName, cameraId, cameraIndex, ca
         --VehicleSchemaDisplay:setVehicle(nil)
         --SpeedMeterDisplay:setVehicle(nil)
     elseif cameraType == CameraChangeEvent.CAMERA_TYPE_VEHICLE then
-        print("g_currentMission.controlledVehicles start")
-        DebugUtil.printTableRecursively(g_currentMission.controlledVehicles, "", 0, 1)
-        print("g_currentMission.controlledVehicles end")
+        --print("g_currentMission.controlledVehicles start")
+        --DebugUtil.printTableRecursively(g_currentMission.controlledVehicles, "", 0, 1)
+        --print("g_currentMission.controlledVehicles end")
         for _, v in pairs(g_currentMission.controlledVehicles) do
-            --print("v:getControllerName() " .. tostring(v:getControllerName()) .. " actorName " .. actorName)
+            print("v:getControllerName() " .. tostring(v:getControllerName()) .. " actorName " .. actorName)
             if v:getControllerName() == actorName then
                 local spec = v:spectatorMode_getSpecTable()
                 setCamera(v.spec_enterable.cameras[cameraIndex].cameraNode)
@@ -341,7 +341,7 @@ function SpectatorMode:delayedCameraChanged(actorName, cameraId, cameraIndex, ca
         --print("g_currentMission.controlledVehicles indoor start")
         for _, v in pairs(g_currentMission.controlledVehicles) do
             --print("g_currentMission.controlledVehicles indoor end")
-            --print("indoor v:getControllerName() " .. tostring(v:getControllerName()) .. " actorName " .. actorName)
+            print("indoor v:getControllerName() " .. tostring(v:getControllerName()) .. " actorName " .. actorName)
             if v:getControllerName() == actorName then
                 local spec = v:spectatorMode_getSpecTable()
                 setCamera(v.spec_enterable.cameras[cameraIndex].cameraNode)
@@ -378,7 +378,7 @@ function SpectatorMode:minimapChange(aName, mmState)
 end
 
 function SpectatorMode:requestToEnterVehicle(superFunc, vehicle)
-    --print("SpectatorMode:requestToEnterVehicle() g_spectatorMode.spectating " .. tostring(g_spectatorMode.spectating) .. " self.spectating " .. tostring(self.spectating))
+    g_spectatorMode:print("requestToEnterVehicle() g_spectatorMode.spectating " .. tostring(g_spectatorMode.spectating))
     if not g_spectatorMode.spectating then
         if superFunc ~= nil then
             superFunc(self, vehicle)
@@ -401,13 +401,13 @@ function SpectatorMode:toggleSize(superFunc, state, force, noEventSend)
 end
 
 function SpectatorMode:onUserRemoved(player)
-    print("onUserRemoved start")
-    DebugUtil.printTableRecursively(player, "-", 0, 3)
-    print("onUserRemoved playername: " .. tostring(player.playerName) .. "g_player " .. tostring(g_spectatorMode.spectatedPlayer))
-    print("spectating " .. tostring(g_spectatorMode.spectating))
-    if g_spectatorMode.spectating and player.visualInformation.playerName == g_spectatorMode.spectatedPlayer then
-        print("Stopping spectating player " .. tostring(player.visualInformation.playerName))
+    -- print("onUserRemoved start")
+    -- DebugUtil.printTableRecursively(player, "-", 0, 3)
+    -- print("onUserRemoved playername: " .. tostring(player.playerName) .. " g_player " .. tostring(g_spectatorMode.spectatedPlayer))
+    -- print("spectating " .. tostring(g_spectatorMode.spectating))
+    if g_spectatorMode.spectating and player.nickname == g_spectatorMode.spectatedPlayer then
+        self:print("Stopping spectating player " .. tostring(player.visualInformation.playerName))
         g_spectatorMode:stopSpectate(true)
     end
-    print("onUserRemoved end")
+    -- print("onUserRemoved end")
 end

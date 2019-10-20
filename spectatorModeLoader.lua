@@ -4,7 +4,6 @@
 -- @author TyKonKet
 -- @date 04/01/2017
 
---local name = "SpectatorModeRecorder"
 local modDirectory = g_currentModDirectory
 local modName = g_currentModName
 local debugActive = true

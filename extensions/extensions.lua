@@ -17,11 +17,11 @@ end
 
 -- g_currentMission extensions
 function FSBaseMission:findUserByNickname(nickname)
-    --print("findUserByNickname start " .. tostring(nickname))
-    --DebugUtil.printTableRecursively(self.userManager.users, "", 0, 3)
-    --print("findUserByNickname end " .. tostring(nickname))
     for _, user in ipairs(self.userManager.users) do
         if user.nickname == nickname then
+            --print("findUserByNickname start " .. tostring(nickname))
+            --DebugUtil.printTableRecursively(user, "", 0, 3)
+            --print("findUserByNickname end " .. tostring(nickname))
             return user
         end
     end
@@ -29,11 +29,11 @@ function FSBaseMission:findUserByNickname(nickname)
 end
 
 function FSBaseMission:getPlayerByName(name)
-    --print("getPlayerByName start " .. tostring(name))
-    --DebugUtil.printTableRecursively(g_currentMission.players, "", 0, 3)
-    --print("getPlayerByName end " .. tostring(name))
     for _, v in pairs(g_currentMission.players) do
         if v.visualInformation.playerName == name then
+            --print("getPlayerByName start " .. tostring(name))
+            --DebugUtil.printTableRecursively(v, "", 0, 3)
+            --print("getPlayerByName end " .. tostring(name))
             return v
         end
     end
