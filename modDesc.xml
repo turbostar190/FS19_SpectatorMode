@@ -23,21 +23,6 @@
         <action name="SM_TOGGLE" />
         <action name="SM_SWITCH_ACTOR_NEXT" />
         <action name="SM_SWITCH_ACTOR_PREVIOUS" />
-        <action name="SM_SWITCH_ACTOR_1" />
-        <action name="SM_SWITCH_ACTOR_2" />
-        <action name="SM_SWITCH_ACTOR_3" />
-        <action name="SM_SWITCH_ACTOR_4" />
-        <action name="SM_SWITCH_ACTOR_5" />
-        <action name="SM_SWITCH_ACTOR_6" />
-        <action name="SM_SWITCH_ACTOR_7" />
-        <action name="SM_SWITCH_ACTOR_8" />
-        <action name="SM_SWITCH_ACTOR_9" />
-        <action name="SM_SWITCH_ACTOR_10" />
-        <action name="SM_SWITCH_ACTOR_11" />
-        <action name="SM_SWITCH_ACTOR_12" />
-        <action name="SM_SWITCH_ACTOR_13" />
-        <action name="SM_SWITCH_ACTOR_14" />
-        <action name="SM_SWITCH_ACTOR_15" />
     </actions>
 
     <inputBinding>
@@ -49,51 +34,6 @@
         </actionBinding>
         <actionBinding action="SM_SWITCH_ACTOR_PREVIOUS">
             <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_tab" />
-        </actionBinding>
-        <actionBinding action="SM_SWITCH_ACTOR_1">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_a" />
-        </actionBinding>
-        <actionBinding action="SM_SWITCH_ACTOR_2">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_s" />
-        </actionBinding>
-        <actionBinding action="SM_SWITCH_ACTOR_3">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_d" />
-        </actionBinding>
-        <actionBinding action="SM_SWITCH_ACTOR_4">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_f" />
-        </actionBinding>
-        <actionBinding action="SM_SWITCH_ACTOR_5">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_g" />
-        </actionBinding>
-        <actionBinding action="SM_SWITCH_ACTOR_6">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_h" />
-        </actionBinding>
-        <actionBinding action="SM_SWITCH_ACTOR_7">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_j" />
-        </actionBinding>
-        <actionBinding action="SM_SWITCH_ACTOR_8">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_k" />
-        </actionBinding>
-        <actionBinding action="SM_SWITCH_ACTOR_9">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_l" />
-        </actionBinding>
-        <actionBinding action="SM_SWITCH_ACTOR_10">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_z" />
-        </actionBinding>
-        <actionBinding action="SM_SWITCH_ACTOR_11">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_x" />
-        </actionBinding>
-        <actionBinding action="SM_SWITCH_ACTOR_12">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_c" />
-        </actionBinding>
-        <actionBinding action="SM_SWITCH_ACTOR_13">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_v" />
-        </actionBinding>
-        <actionBinding action="SM_SWITCH_ACTOR_14">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_b" />
-        </actionBinding>
-        <actionBinding action="SM_SWITCH_ACTOR_15">
-            <binding device="KB_MOUSE_DEFAULT" input="KEY_n" />
         </actionBinding>
     </inputBinding>
 

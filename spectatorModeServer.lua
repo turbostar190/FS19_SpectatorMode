@@ -54,7 +54,7 @@ function SpectatorModeServer:addSubscriber(sName, connection, aName)
 end
 
 function SpectatorModeServer:removeSubscriber(sName, aName)
-    self:print("removeSubscriber(sName:%s, aName:%s", sName, aName)
+    self:print("removeSubscriber(sName:%s, aName:%s)", sName, aName)
     if self.clients[aName] ~= nil and self.clients[aName].subscribers ~= nil and self.clients[aName].subscribers[sName] ~= nil then
         self.clients[aName].subscribers[sName] = nil
     end

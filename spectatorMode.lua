@@ -113,6 +113,11 @@ function SpectatorMode:registerActionEvents()
     if self.isClient then
         local _, eventId = g_inputBinding:registerActionEvent(InputAction.SM_TOGGLE, self, self.toggleActionEvent, false, true, false, true)
         self.spectateGuiEventId = eventId
+
+        local _, eventId1 = g_inputBinding:registerActionEvent(InputAction.SM_SWITCH_ACTOR_PREVIOUS, self, self.startSpectatePreviousActionEvent, false, true, false, true)
+        local _, eventId2 = g_inputBinding:registerActionEvent(InputAction.SM_SWITCH_ACTOR_NEXT, self, self.startSpectateNextActionEvent, false, true, false, true)
+        self.smSwitchActorPrevious = eventId1
+        self.smSwitchActorNext = eventId2
         --self:print(string.format("smToggle: %s , smSwitchActorNext: %s , smSwitchActorPrevious: %s", tostring(g_spectatorMode.smToggle), tostring(g_spectatorMode.smSwitchActorNext), tostring(g_spectatorMode.smSwitchActorPrevious)))
     end
 end
@@ -164,7 +169,7 @@ function SpectatorMode:getPreviousPlayerIndex()
     end
 end
 
---[[function SpectateGui:startSpectateNextActionEvent()
+function SpectateGui:startSpectateNextActionEvent()
 	self:print("startSpectateNextActionEvent()")
 	if g_currentMission.controlledVehicle == nil then
 		self:print("startSpectateNextActionEvent() -> self.spectating " .. tostring(self.spectating))
@@ -183,7 +188,7 @@ function SpectateGui:startSpectatePreviousActionEvent()
 			g_spectatorMode:startSpectate(SpectatorMode:getPreviousPlayerIndex())
 		end
 	end
-end]]
+end
 
 function SpectatorMode:delete()
     self.spectatedOverlay:delete()
@@ -217,8 +222,18 @@ function SpectatorMode:draw()
         --self:print(string.format("update() :: smToggle: %s , smSwitchActorNext: %s , smSwitchActorPrevious: %s", tostring(g_spectatorMode.smToggle), tostring(g_spectatorMode.smSwitchActorNext), tostring(g_spectatorMode.smSwitchActorPrevious)))
         if self.spectating then
             g_inputBinding:setActionEventText(self.spectateGuiEventId, g_i18n:getText("SM_STOP"))
+
+            g_inputBinding:setActionEventActive(self.smSwitchActorPrevious, true)
+            g_inputBinding:setActionEventTextVisibility(self.smSwitchActorPrevious, true)
+            g_inputBinding:setActionEventActive(self.smSwitchActorNext, true)
+            g_inputBinding:setActionEventTextVisibility(self.smSwitchActorNext, true)
         else
             g_inputBinding:setActionEventText(self.spectateGuiEventId, g_i18n:getText("SM_START"))
+
+            g_inputBinding:setActionEventActive(self.smSwitchActorPrevious, false)
+            g_inputBinding:setActionEventTextVisibility(self.smSwitchActorPrevious, false)
+            g_inputBinding:setActionEventActive(self.smSwitchActorNext, false)
+            g_inputBinding:setActionEventTextVisibility(self.smSwitchActorNext, false)
         end
         g_inputBinding:setActionEventActive(self.spectateGuiEventId, true)
         g_inputBinding:setActionEventTextVisibility(self.spectateGuiEventId, true)
@@ -323,7 +338,7 @@ function SpectatorMode:delayedCameraChanged(actorName, cameraId, cameraIndex, ca
         --DebugUtil.printTableRecursively(g_currentMission.controlledVehicles, "", 0, 1)
         --print("g_currentMission.controlledVehicles end")
         for _, v in pairs(g_currentMission.controlledVehicles) do
-            print("v:getControllerName() " .. tostring(v:getControllerName()) .. " actorName " .. actorName)
+            -- print("v:getControllerName() " .. tostring(v:getControllerName()) .. " actorName " .. actorName)
             if v:getControllerName() == actorName then
                 local spec = v:spectatorMode_getSpecTable()
                 setCamera(v.spec_enterable.cameras[cameraIndex].cameraNode)
@@ -341,7 +356,7 @@ function SpectatorMode:delayedCameraChanged(actorName, cameraId, cameraIndex, ca
         --print("g_currentMission.controlledVehicles indoor start")
         for _, v in pairs(g_currentMission.controlledVehicles) do
             --print("g_currentMission.controlledVehicles indoor end")
-            print("indoor v:getControllerName() " .. tostring(v:getControllerName()) .. " actorName " .. actorName)
+            --print("indoor v:getControllerName() " .. tostring(v:getControllerName()) .. " actorName " .. actorName)
             if v:getControllerName() == actorName then
                 local spec = v:spectatorMode_getSpecTable()
                 setCamera(v.spec_enterable.cameras[cameraIndex].cameraNode)
@@ -406,7 +421,7 @@ function SpectatorMode:onUserRemoved(player)
     -- print("onUserRemoved playername: " .. tostring(player.playerName) .. " g_player " .. tostring(g_spectatorMode.spectatedPlayer))
     -- print("spectating " .. tostring(g_spectatorMode.spectating))
     if g_spectatorMode.spectating and player.nickname == g_spectatorMode.spectatedPlayer then
-        self:print("Stopping spectating player " .. tostring(player.visualInformation.playerName))
+        self:print("Stopping spectating player " .. tostring(player.nickname))
         g_spectatorMode:stopSpectate(true)
     end
     -- print("onUserRemoved end")
