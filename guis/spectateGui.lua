@@ -51,7 +51,8 @@ end
 
 --TODO: Non funziona il tasto invio
 function SpectateGui:onClickActivate()
-	SpectateGui:superClass().onClickActivate(self)
+	--SpectateGui:superClass().onClickActivate(self)
+    SpectateGui:superClass().onClickOk(self) --TODO: Test!
 	if self.areButtonsDisabled then
 		return
 	end

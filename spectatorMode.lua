@@ -20,6 +20,9 @@ function SpectatorMode:new(mission, i18n, modDirectory, gui, inputManager, dedic
     self.debug = debug
 
     self.spectateGuiEventId = ""
+    self.smSwitchActorPreviousEventId = ""
+    self.smSwitchActorNextEventId = ""
+
     self.spectateGui = SpectateGui:new(self.isServer, self.isClient)
     local xml = Utils.getFilename("guis/spectateGui.xml", self.modDirectory)
     self.gui:loadGui(xml, "SpectateGui", self.spectateGui)
@@ -92,20 +95,22 @@ function SpectatorMode:print(text, ...)
     end
 end
 
----This is called before anything of the game has been created.
+-- This is called before anything of the game has been created.
 -- The vehicle types must not be initialized yet to make any changes to them.
 function SpectatorMode.installSpecialization(vehicleTypeManager, specializationManager, modDirectory, modName)
-    specializationManager:addSpecialization("SMV", "SMVehicle", Utils.getFilename("extensions/SMVehicle.lua", modDirectory), nil) -- Nil is important here
+    if g_specializationManager:getSpecializationByName("SMVehicle") == nil then
+        specializationManager:addSpecialization("SMV", "SMVehicle", Utils.getFilename("extensions/SMVehicle.lua", modDirectory), nil) -- Nil is important here
 
-    for typeName, typeEntry in pairs(vehicleTypeManager:getVehicleTypes()) do
-        if SpecializationUtil.hasSpecialization(Enterable, typeEntry.specializations) then
-            vehicleTypeManager:addSpecialization(typeName, modName .. ".SMV") --TODO: Spec is registestered with prefix modName... change to spec_SMV
+        for typeName, typeEntry in pairs(vehicleTypeManager:getVehicleTypes()) do
+            if SpecializationUtil.hasSpecialization(Enterable, typeEntry.specializations) then
+                vehicleTypeManager:addSpecialization(typeName, modName .. ".SMV") --TODO: Spec is registestered with prefix modName... change to spec_SMV?
+                print("  Attached SMV to vehicle type " .. tostring(typeName))
+            end
         end
     end
 end
 
 function SpectatorMode:inj_fsBaseMission_registerActionEvents()
-    --print("inj_fsBaseMission_registerActionEvents")
     g_spectatorMode:registerActionEvents()
 end
 
@@ -114,18 +119,19 @@ function SpectatorMode:registerActionEvents()
         local _, eventId = g_inputBinding:registerActionEvent(InputAction.SM_TOGGLE, self, self.toggleActionEvent, false, true, false, true)
         self.spectateGuiEventId = eventId
 
-        local _, eventId1 = g_inputBinding:registerActionEvent(InputAction.SM_SWITCH_ACTOR_PREVIOUS, self, self.startSpectatePreviousActionEvent, false, true, false, true)
-        local _, eventId2 = g_inputBinding:registerActionEvent(InputAction.SM_SWITCH_ACTOR_NEXT, self, self.startSpectateNextActionEvent, false, true, false, true)
-        self.smSwitchActorPrevious = eventId1
-        self.smSwitchActorNext = eventId2
-        --self:print(string.format("smToggle: %s , smSwitchActorNext: %s , smSwitchActorPrevious: %s", tostring(g_spectatorMode.smToggle), tostring(g_spectatorMode.smSwitchActorNext), tostring(g_spectatorMode.smSwitchActorPrevious)))
+        --local _, eventId1 = g_inputBinding:registerActionEvent(InputAction.SM_SWITCH_ACTOR_PREVIOUS, self, self.startSpectatePreviousActionEvent, false, true, false, true)
+        --local _, eventId2 = g_inputBinding:registerActionEvent(InputAction.SM_SWITCH_ACTOR_NEXT, self, self.startSpectateNextActionEvent, false, true, false, true)
+        --self.smSwitchActorPreviousEventId = eventId1
+        --self.smSwitchActorNextEventId = eventId2
+
+        self:print(string.format("spectateGuiEventId: %s", tostring(self.spectateGuiEventId)))
+        --self:print(string.format("spectateGuiEventId: %s , smSwitchActorPreviousEventId: %s , smSwitchActorNextEventId: %s", tostring(self.spectateGuiEventId), tostring(self.smSwitchActorPreviousEventId), tostring(self.smSwitchActorNextEventId)))
     end
 end
 
 function SpectatorMode:toggleActionEvent()
-    --print("toggleActionEvent()")
+    self:print("toggleActionEvent() -> self.spectating " .. tostring(self.spectating))
     if g_currentMission.controlledVehicle == nil then
-        --print("toggleActionEvent() -> g_spectatorMode.spectating " .. tostring(g_spectatorMode.spectating) .. " self.spectating " .. tostring(self.spectating))
         if self.spectating then
             self:stopSpectate()
         else
@@ -146,6 +152,9 @@ end
 function SpectatorMode:getSpectableUsers()
     local spectableUsers = {}
     for _, p in pairs(g_currentMission.players) do
+        -- TODO: Verificare se chi è spectato non possa a sua volta spectare
+        self:print(string.format("p.isDedicatedServer %s p:getIsSpectated() %s g_currentMission.player.visualInformation.playerName %s p.visualInformation.playerName %s",
+                tostring(p.isDedicatedServer), tostring(p:getIsSpectated()), tostring(g_currentMission.player.visualInformation.playerName), tostring(p.visualInformation.playerName)))
         if not p.isDedicatedServer and not p:getIsSpectated() and g_currentMission.player.visualInformation.playerName ~= p.visualInformation.playerName then
             table.insert(spectableUsers, p.visualInformation.playerName)
         end
@@ -153,7 +162,7 @@ function SpectatorMode:getSpectableUsers()
     return spectableUsers
 end
 
-function SpectatorMode:getNextPlayerIndex()
+--[[function SpectatorMode:getNextPlayerIndex()
     if self.spectatedPlayerIndex == #self:getSpectableUsers() then
         return 1
     else
@@ -172,7 +181,7 @@ end
 function SpectateGui:startSpectateNextActionEvent()
 	self:print("startSpectateNextActionEvent()")
 	if g_currentMission.controlledVehicle == nil then
-		self:print("startSpectateNextActionEvent() -> self.spectating " .. tostring(self.spectating))
+		self:print("    startSpectateNextActionEvent() -> self.spectating " .. tostring(self.spectating))
 		if self.spectating then
 			g_spectatorMode:stopSpectate()
 			g_spectatorMode:startSpectate(SpectatorMode:getNextPlayerIndex())
@@ -182,13 +191,13 @@ end
 function SpectateGui:startSpectatePreviousActionEvent()
 	self:print("startSpectatePreviousActionEvent()")
 	if g_currentMission.controlledVehicle == nil then
-		self:print("startSpectatePreviousActionEvent() -> self.spectating " .. tostring(self.spectating))
+		self:print("    startSpectatePreviousActionEvent() -> self.spectating " .. tostring(self.spectating))
 		if self.spectating then
 			g_spectatorMode:stopSpectate()
 			g_spectatorMode:startSpectate(SpectatorMode:getPreviousPlayerIndex())
 		end
 	end
-end
+end]]
 
 function SpectatorMode:delete()
     self.spectatedOverlay:delete()
@@ -208,8 +217,8 @@ function SpectatorMode:draw()
     self.spectateFadeEffect:draw()
     if self.spectatedVehicle ~= nil then
         if self.spectatedVehicle.spec_drivable ~= nil then
-            --g_currentMission:drawVehicleHud(self.spectatedVehicle)
             -- TODO: Not Working
+            --g_currentMission:drawVehicleHud(self.spectatedVehicle)
             --g_currentMission:drawHudIcon()
             -- g_vehicleSchemaDisplay:drawVehicleSchemaOverlays(self.spectatedVehicle)
             --g_currentMission:drawVehicleSchemaOverlays(self.spectatedVehicle)
@@ -219,21 +228,21 @@ function SpectatorMode:draw()
         self.spectatedOverlay:render()
     end
     if g_currentMission.controlledVehicle == nil then
-        --self:print(string.format("update() :: smToggle: %s , smSwitchActorNext: %s , smSwitchActorPrevious: %s", tostring(g_spectatorMode.smToggle), tostring(g_spectatorMode.smSwitchActorNext), tostring(g_spectatorMode.smSwitchActorPrevious)))
+        --self:print(string.format("update() :: smToggle: %s , smSwitchActorNextEventId: %s , smSwitchActorPreviousEventId: %s", tostring(g_spectatorMode.smToggle), tostring(g_spectatorMode.smSwitchActorNextEventId), tostring(g_spectatorMode.smSwitchActorPreviousEventId)))
         if self.spectating then
             g_inputBinding:setActionEventText(self.spectateGuiEventId, g_i18n:getText("SM_STOP"))
 
-            g_inputBinding:setActionEventActive(self.smSwitchActorPrevious, true)
-            g_inputBinding:setActionEventTextVisibility(self.smSwitchActorPrevious, true)
-            g_inputBinding:setActionEventActive(self.smSwitchActorNext, true)
-            g_inputBinding:setActionEventTextVisibility(self.smSwitchActorNext, true)
+            --[[            g_inputBinding:setActionEventActive(self.smSwitchActorPreviousEventId, true)
+                        g_inputBinding:setActionEventTextVisibility(self.smSwitchActorPreviousEventId, true)
+                        g_inputBinding:setActionEventActive(self.smSwitchActorNextEventId, true)
+                        g_inputBinding:setActionEventTextVisibility(self.smSwitchActorNextEventId, true)]]
         else
             g_inputBinding:setActionEventText(self.spectateGuiEventId, g_i18n:getText("SM_START"))
 
-            g_inputBinding:setActionEventActive(self.smSwitchActorPrevious, false)
-            g_inputBinding:setActionEventTextVisibility(self.smSwitchActorPrevious, false)
-            g_inputBinding:setActionEventActive(self.smSwitchActorNext, false)
-            g_inputBinding:setActionEventTextVisibility(self.smSwitchActorNext, false)
+            --[[            g_inputBinding:setActionEventActive(self.smSwitchActorPreviousEventId, false)
+                        g_inputBinding:setActionEventTextVisibility(self.smSwitchActorPreviousEventId, false)
+                        g_inputBinding:setActionEventActive(self.smSwitchActorNextEventId, false)
+                        g_inputBinding:setActionEventTextVisibility(self.smSwitchActorNextEventId, false)]]
         end
         g_inputBinding:setActionEventActive(self.spectateGuiEventId, true)
         g_inputBinding:setActionEventTextVisibility(self.spectateGuiEventId, true)
@@ -275,12 +284,12 @@ function SpectatorMode:stopSpectate(disconnect)
     end
     --self.spectatedPlayerObject:setVisibility(true)
     self.spectatedPlayerObject:setWoodWorkVisibility(true, true)
---[[    if self.spectatedVehicle ~= nil then
-        g_currentMission.player:moveToExitPoint(self.spectatedVehicle)
-    else
-        local x, y, z = getTranslation(self.spectatedPlayerObject.rootNode)
-        g_currentMission.player:moveToAbsoluteInternal(x, y, z)
-    end]]
+    --[[    if self.spectatedVehicle ~= nil then
+            g_currentMission.player:moveToExitPoint(self.spectatedVehicle)
+        else
+            local x, y, z = getTranslation(self.spectatedPlayerObject.rootNode)
+            g_currentMission.player:moveToAbsoluteInternal(x, y, z)
+        end]]
     self.spectatedPlayerObject = nil
     self.spectatedPlayer = nil
     --self.spectatedPlayerIndex = nil
@@ -416,13 +425,8 @@ function SpectatorMode:toggleSize(superFunc, state, force, noEventSend)
 end
 
 function SpectatorMode:onUserRemoved(player)
-    -- print("onUserRemoved start")
-    -- DebugUtil.printTableRecursively(player, "-", 0, 3)
-    -- print("onUserRemoved playername: " .. tostring(player.playerName) .. " g_player " .. tostring(g_spectatorMode.spectatedPlayer))
-    -- print("spectating " .. tostring(g_spectatorMode.spectating))
     if g_spectatorMode.spectating and player.nickname == g_spectatorMode.spectatedPlayer then
         self:print("Stopping spectating player " .. tostring(player.nickname))
         g_spectatorMode:stopSpectate(true)
     end
-    -- print("onUserRemoved end")
 end

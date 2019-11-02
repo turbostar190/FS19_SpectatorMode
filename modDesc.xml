@@ -21,20 +21,20 @@
 
     <actions>
         <action name="SM_TOGGLE" />
-        <action name="SM_SWITCH_ACTOR_NEXT" />
-        <action name="SM_SWITCH_ACTOR_PREVIOUS" />
+        <!--<action name="SM_SWITCH_ACTOR_NEXT" />
+        <action name="SM_SWITCH_ACTOR_PREVIOUS" />-->
     </actions>
 
     <inputBinding>
         <actionBinding action="SM_TOGGLE">
             <binding device="KB_MOUSE_DEFAULT" input="KEY_insert" />
         </actionBinding>
-        <actionBinding action="SM_SWITCH_ACTOR_NEXT">
+        <!--<actionBinding action="SM_SWITCH_ACTOR_NEXT">
             <binding device="KB_MOUSE_DEFAULT" input="KEY_tab" />
         </actionBinding>
         <actionBinding action="SM_SWITCH_ACTOR_PREVIOUS">
             <binding device="KB_MOUSE_DEFAULT" input="KEY_lshift KEY_tab" />
-        </actionBinding>
+        </actionBinding>-->
     </inputBinding>
 
     <l10n>
@@ -46,7 +46,7 @@
             <nl>Start/Stop Kijkers Modus</nl>
             <pl>Rozpocznij/Zakończ podglądanie</pl>
         </text>
-        <text name="input_SM_SWITCH_ACTOR_NEXT">
+        <!--<text name="input_SM_SWITCH_ACTOR_NEXT">
             <de>Folgend spieler</de>
             <en>Next player</en>
             <fr>Joueur suivant</fr>
@@ -197,7 +197,7 @@
             <it>Osserva %s</it>
             <nl>Kijk %s</nl>
             <pl>Podglądaj %s</pl>
-        </text>
+        </text>-->
         <text name="SM_START">
             <de>Starten Zuschauermodus</de>
             <en>Start spectating</en>

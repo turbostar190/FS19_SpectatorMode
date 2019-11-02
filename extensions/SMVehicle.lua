@@ -22,7 +22,7 @@ end
 
 function SMVehicle.registerEventListeners(vehicleType)
     local events = { "onPostLoad",
-                     --"onUpdateInterpolation",
+        --"onUpdateInterpolation",
                      "onUpdate",
                      "onReadUpdateStream",
                      "onWriteUpdateStream",
@@ -126,7 +126,7 @@ function SMVehicle:onUpdate(dt, isActiveForInput, isActiveForInputIgnoreSelectio
     --TODO: Con AI inserita e guardata a piedi attraverso la spectator lo sterzo non ruota. Dovrebbe esserci una soluzione nella passenger mod
     -- This is needed as the Drivable.lua only shows this for the person who is the vehicle.
     if self.spec_drivable ~= nil and self:getIsAIActive() then
-        self:doSteeringWheelUpdate(self.spec_drivable.steeringWheel, dt, 1)
+        self:doSteeringWheelUpdate(self.spec_drivable.steeringWheel, dt, 1) -- TODO: Test
     end
     self:raiseActive() -- ??
 end
@@ -134,8 +134,8 @@ end
 function SMVehicle:doSteeringWheelUpdate(steeringWheel, dt, direction)
     if steeringWheel ~= nil then
         local maxRotation = steeringWheel.outdoorRotation
-        local activeCamera = self.spec_universalPassenger.activeCamera
-        if activeCamera ~= nil and self.spec_enterable.activeCamera.isInside then
+        local activeCamera = self.spec_enterable.activeCamera
+        if activeCamera ~= nil and activeCamera.isInside then
             maxRotation = steeringWheel.indoorRotation
         end
 
@@ -157,29 +157,29 @@ function SMVehicle:onWriteUpdateStream(streamId, connection)
     --if not connection:getIsServer() then
     local spec = self:spectatorMode_getSpecTable()
     local specE = self.spec_enterable
-        if self.isServer and not specE.isEntered then
-            for _, v in pairs(specE.cameras) do
-                streamWriteFloat32(streamId, spec.camerasLerp[v.cameraNode].targetQuaternion[1])
-                streamWriteFloat32(streamId, spec.camerasLerp[v.cameraNode].targetQuaternion[2])
-                streamWriteFloat32(streamId, spec.camerasLerp[v.cameraNode].targetQuaternion[3])
-                streamWriteFloat32(streamId, spec.camerasLerp[v.cameraNode].targetQuaternion[4])
-                streamWriteFloat32(streamId, spec.camerasLerp[v.cameraNode].targetTranslation[1])
-                streamWriteFloat32(streamId, spec.camerasLerp[v.cameraNode].targetTranslation[2])
-                streamWriteFloat32(streamId, spec.camerasLerp[v.cameraNode].targetTranslation[3])
-            end
-        else
-            for _, v in pairs(specE.cameras) do
-                local x, y, z, w = getQuaternion(v.rotateNode)
-                streamWriteFloat32(streamId, x)
-                streamWriteFloat32(streamId, y)
-                streamWriteFloat32(streamId, z)
-                streamWriteFloat32(streamId, w)
-                x, y, z = getTranslation(v.cameraPositionNode)
-                streamWriteFloat32(streamId, x)
-                streamWriteFloat32(streamId, y)
-                streamWriteFloat32(streamId, z)
-            end
+    if self.isServer and not specE.isEntered then
+        for _, v in pairs(specE.cameras) do
+            streamWriteFloat32(streamId, spec.camerasLerp[v.cameraNode].targetQuaternion[1])
+            streamWriteFloat32(streamId, spec.camerasLerp[v.cameraNode].targetQuaternion[2])
+            streamWriteFloat32(streamId, spec.camerasLerp[v.cameraNode].targetQuaternion[3])
+            streamWriteFloat32(streamId, spec.camerasLerp[v.cameraNode].targetQuaternion[4])
+            streamWriteFloat32(streamId, spec.camerasLerp[v.cameraNode].targetTranslation[1])
+            streamWriteFloat32(streamId, spec.camerasLerp[v.cameraNode].targetTranslation[2])
+            streamWriteFloat32(streamId, spec.camerasLerp[v.cameraNode].targetTranslation[3])
         end
+    else
+        for _, v in pairs(specE.cameras) do
+            local x, y, z, w = getQuaternion(v.rotateNode)
+            streamWriteFloat32(streamId, x)
+            streamWriteFloat32(streamId, y)
+            streamWriteFloat32(streamId, z)
+            streamWriteFloat32(streamId, w)
+            x, y, z = getTranslation(v.cameraPositionNode)
+            streamWriteFloat32(streamId, x)
+            streamWriteFloat32(streamId, y)
+            streamWriteFloat32(streamId, z)
+        end
+    end
     --end
 end
 
@@ -188,25 +188,25 @@ function SMVehicle:onReadUpdateStream(streamId, timestamp, connection)
 
     --if connection:getIsServer() then
     local spec = self:spectatorMode_getSpecTable()
-        for _, v in pairs(self.spec_enterable.cameras) do
-            local x, y, z, w, tx, ty, tz = 0
-            x = streamReadFloat32(streamId)
-            y = streamReadFloat32(streamId)
-            z = streamReadFloat32(streamId)
-            w = streamReadFloat32(streamId)
-            tx = streamReadFloat32(streamId)
-            ty = streamReadFloat32(streamId)
-            tz = streamReadFloat32(streamId)
-            spec.camerasLerp[v.cameraNode].lastQuaternion = { getQuaternion(v.rotateNode) }
-            spec.camerasLerp[v.cameraNode].targetQuaternion = { x, y, z, w }
-            spec.camerasLerp[v.cameraNode].lastTranslation = { getTranslation(v.cameraPositionNode) }
-            spec.camerasLerp[v.cameraNode].targetTranslation = { tx, ty, tz }
-            spec.camerasLerp[v.cameraNode].interpolationAlpha = 0
-            if spec.camerasLerp[v.cameraNode].skipNextInterpolationAlpha then
-                spec.camerasLerp[v.cameraNode].interpolationAlpha = 1
-                spec.camerasLerp[v.cameraNode].skipNextInterpolationAlpha = false
-            end
+    for _, v in pairs(self.spec_enterable.cameras) do
+        local x, y, z, w, tx, ty, tz = 0
+        x = streamReadFloat32(streamId)
+        y = streamReadFloat32(streamId)
+        z = streamReadFloat32(streamId)
+        w = streamReadFloat32(streamId)
+        tx = streamReadFloat32(streamId)
+        ty = streamReadFloat32(streamId)
+        tz = streamReadFloat32(streamId)
+        spec.camerasLerp[v.cameraNode].lastQuaternion = { getQuaternion(v.rotateNode) }
+        spec.camerasLerp[v.cameraNode].targetQuaternion = { x, y, z, w }
+        spec.camerasLerp[v.cameraNode].lastTranslation = { getTranslation(v.cameraPositionNode) }
+        spec.camerasLerp[v.cameraNode].targetTranslation = { tx, ty, tz }
+        spec.camerasLerp[v.cameraNode].interpolationAlpha = 0
+        if spec.camerasLerp[v.cameraNode].skipNextInterpolationAlpha then
+            spec.camerasLerp[v.cameraNode].interpolationAlpha = 1
+            spec.camerasLerp[v.cameraNode].skipNextInterpolationAlpha = false
         end
+    end
     --end
 end
 
