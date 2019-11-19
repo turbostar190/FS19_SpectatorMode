@@ -7,7 +7,8 @@
 SpectateRejectedEvent = {}
 SpectateRejectedEvent.REASON_DEDICATED_SERVER = 0
 SpectateRejectedEvent.REASON_YOURSELF = 1
-SpectateRejectedEvent.REASONS = 2
+SpectateRejectedEvent.REASON_ACTOR_SPECTATING = 2
+SpectateRejectedEvent.REASONS = 3
 SpectateRejectedEvent.sendNumBits = Utils.getNumBits(SpectateRejectedEvent.REASONS)
 SpectateRejectedEvent_mt = Class(SpectateRejectedEvent, Event)
 

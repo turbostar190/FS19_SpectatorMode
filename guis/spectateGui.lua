@@ -7,15 +7,8 @@ SpectateGui = {}
 local SpectateGui_mt = Class(SpectateGui, ScreenElement)
 
 SpectateGui.CONTROLS = {
-    DIALOG_ELEMENT = "dialogElement",
-
-    DIALOG_TITLE_ELEMENT = "dialogTitleElement",
-    DIALOG_TEXT_ELEMENT = "dialogTextElement",
-    SPECTABLE_USERS_ELEMENT = "spectableUsersElement",
-    USERNAME = "userName",
-    MESSAGE_BACKGROUND = "messageBackground",
-    BUTTONS_PC = "buttonsPC",
-
+	SPECTABLE_USERS_ELEMENT = "spectableUsersElement",
+	MESSAGE_BACKGROUND = "messageBackground",
 	NO_BUTTON = "noButton",
 	SPECTATE_BUTTON = "spectateButton"
 }
@@ -25,8 +18,8 @@ function SpectateGui:new(isServer, isClient)
 
 	self:registerControls(SpectateGui.CONTROLS)
 
-    self.isServer = isServer
-    self.isClient = isClient
+	self.isServer = isServer
+	self.isClient = isClient
 	self.returnScreenName = ""
 	self.selectedState = 1
 	self.areButtonsDisabled = false
@@ -50,12 +43,11 @@ function SpectateGui:onClose()
 end
 
 --TODO: Non funziona il tasto invio
-function SpectateGui:onClickActivate()
-	--SpectateGui:superClass().onClickActivate(self)
-    SpectateGui:superClass().onClickOk(self) --TODO: Test!
+function SpectateGui:onClickOk()
 	if self.areButtonsDisabled then
 		return
 	end
+	SpectateGui:superClass().onClickOk(self)
 	g_spectatorMode:startSpectate(self.selectedState)
 	self.onClickBack(self)
 end
@@ -64,7 +56,7 @@ function SpectateGui:onClickSpectableUsers(state)
 	self.selectedState = state
 end
 
-function SpectateGui:setSpectableUsers(users) 
+function SpectateGui:setSpectableUsers(users)
 	if #users == 0 then
 		self:setDisabled(true)
 		self.messageBackground:setVisible(true)

@@ -52,7 +52,7 @@ function SpectatorMode:new(mission, i18n, modDirectory, gui, inputManager, dedic
 
     self.spectateFadeEffectOffsetX, self.spectateFadeEffectOffsetY = getNormalizedScreenValues(3 * uiScale, -3 * uiScale)
     _, self.spectateFadeEffectSize = getNormalizedScreenValues(0, 40 * uiScale)
-    self.spectateFadeEffect = FadeEffect:new({ position = { x = 0.5, y = g_safeFrameOffsetY }, size = self.spectateFadeEffectSize, shadow = true, shadowPosition = { x = self.spectateFadeEffectOffsetX, y = self.spectateFadeEffectOffsetY } })
+    self.spectateFadeEffect = FadeEffect:new({position = {x = 0.5, y = g_safeFrameOffsetY}, size = self.spectateFadeEffectSize, shadow = true, shadowPosition = {x = self.spectateFadeEffectOffsetX, y = self.spectateFadeEffectOffsetY}})
 
     self.lastPlayer = {}
     self.lastPlayer.mmState = 0
@@ -125,7 +125,7 @@ function SpectatorMode:registerActionEvents()
         --self.smSwitchActorNextEventId = eventId2
 
         self:print(string.format("spectateGuiEventId: %s", tostring(self.spectateGuiEventId)))
-        --self:print(string.format("spectateGuiEventId: %s , smSwitchActorPreviousEventId: %s , smSwitchActorNextEventId: %s", tostring(self.spectateGuiEventId), tostring(self.smSwitchActorPreviousEventId), tostring(self.smSwitchActorNextEventId)))
+    --self:print(string.format("spectateGuiEventId: %s , smSwitchActorPreviousEventId: %s , smSwitchActorNextEventId: %s", tostring(self.spectateGuiEventId), tostring(self.smSwitchActorPreviousEventId), tostring(self.smSwitchActorNextEventId)))
     end
 end
 
@@ -143,6 +143,10 @@ function SpectatorMode:toggleActionEvent()
 end
 
 function SpectatorMode:showGui()
+    -- Se sei specatoto, non puoi a tua volta spectare
+    if self.spectated then
+        return
+    end
     self.spectateGui:setSpectableUsers(self:getSpectableUsers())
     if not self.mission.isSynchronizingWithPlayers then
         self.gui:showDialog("SpectateGui")
@@ -152,10 +156,9 @@ end
 function SpectatorMode:getSpectableUsers()
     local spectableUsers = {}
     for _, p in pairs(g_currentMission.players) do
-        -- TODO: Verificare se chi è spectato non possa a sua volta spectare
-        self:print(string.format("p.isDedicatedServer %s p:getIsSpectated() %s g_currentMission.player.visualInformation.playerName %s p.visualInformation.playerName %s",
-                tostring(p.isDedicatedServer), tostring(p:getIsSpectated()), tostring(g_currentMission.player.visualInformation.playerName), tostring(p.visualInformation.playerName)))
-        if not p.isDedicatedServer and not p:getIsSpectated() and g_currentMission.player.visualInformation.playerName ~= p.visualInformation.playerName then
+        self:print("p.isDedicatedServer %s p:getIsSpectated() %s g_currentMission.player.visualInformation.playerName %s p.visualInformation.playerName %s", p.isDedicatedServer, p:getIsSpectated(), g_currentMission.player.visualInformation.playerName, p.visualInformation.playerName)
+        -- Evitiamo di inserire in lista se stessi e il server dedicato
+        if not p.isDedicatedServer and g_currentMission.player.visualInformation.playerName ~= p.visualInformation.playerName then
             table.insert(spectableUsers, p.visualInformation.playerName)
         end
     end
@@ -198,7 +201,6 @@ function SpectateGui:startSpectatePreviousActionEvent()
 		end
 	end
 end]]
-
 function SpectatorMode:delete()
     self.spectatedOverlay:delete()
 end
@@ -217,11 +219,11 @@ function SpectatorMode:draw()
     self.spectateFadeEffect:draw()
     if self.spectatedVehicle ~= nil then
         if self.spectatedVehicle.spec_drivable ~= nil then
-            -- TODO: Not Working
-            --g_currentMission:drawVehicleHud(self.spectatedVehicle)
-            --g_currentMission:drawHudIcon()
-            -- g_vehicleSchemaDisplay:drawVehicleSchemaOverlays(self.spectatedVehicle)
-            --g_currentMission:drawVehicleSchemaOverlays(self.spectatedVehicle)
+        -- TODO: Not Working
+        --g_currentMission:drawVehicleHud(self.spectatedVehicle)
+        --g_currentMission:drawHudIcon()
+        -- g_vehicleSchemaDisplay:drawVehicleSchemaOverlays(self.spectatedVehicle)
+        --g_currentMission:drawVehicleSchemaOverlays(self.spectatedVehicle)
         end
     end
     if self.spectated then
@@ -230,19 +232,17 @@ function SpectatorMode:draw()
     if g_currentMission.controlledVehicle == nil then
         --self:print(string.format("update() :: smToggle: %s , smSwitchActorNextEventId: %s , smSwitchActorPreviousEventId: %s", tostring(g_spectatorMode.smToggle), tostring(g_spectatorMode.smSwitchActorNextEventId), tostring(g_spectatorMode.smSwitchActorPreviousEventId)))
         if self.spectating then
-            g_inputBinding:setActionEventText(self.spectateGuiEventId, g_i18n:getText("SM_STOP"))
-
             --[[            g_inputBinding:setActionEventActive(self.smSwitchActorPreviousEventId, true)
                         g_inputBinding:setActionEventTextVisibility(self.smSwitchActorPreviousEventId, true)
                         g_inputBinding:setActionEventActive(self.smSwitchActorNextEventId, true)
                         g_inputBinding:setActionEventTextVisibility(self.smSwitchActorNextEventId, true)]]
+            g_inputBinding:setActionEventText(self.spectateGuiEventId, g_i18n:getText("SM_STOP"))
         else
-            g_inputBinding:setActionEventText(self.spectateGuiEventId, g_i18n:getText("SM_START"))
-
             --[[            g_inputBinding:setActionEventActive(self.smSwitchActorPreviousEventId, false)
                         g_inputBinding:setActionEventTextVisibility(self.smSwitchActorPreviousEventId, false)
                         g_inputBinding:setActionEventActive(self.smSwitchActorNextEventId, false)
                         g_inputBinding:setActionEventTextVisibility(self.smSwitchActorNextEventId, false)]]
+            g_inputBinding:setActionEventText(self.spectateGuiEventId, g_i18n:getText("SM_START"))
         end
         g_inputBinding:setActionEventActive(self.spectateGuiEventId, true)
         g_inputBinding:setActionEventTextVisibility(self.spectateGuiEventId, true)
@@ -306,9 +306,11 @@ function SpectatorMode:spectateRejected(reason)
     self:print(("spectateRejected(reason:%s)"):format(reason))
     self:stopSpectate()
     if reason == SpectateRejectedEvent.REASON_DEDICATED_SERVER then
-        g_currentMission:showBlinkingWarning(g18n:getText("SM_ERROR_SPECTATE_DEDICATED_SERVER"), 3000)
+        g_currentMission:showBlinkingWarning(g_i18n:getText("SM_ERROR_SPECTATE_DEDICATED_SERVER"), 3000)
     elseif reason == SpectateRejectedEvent.REASON_YOURSELF then
-        g_currentMission:showBlinkingWarning(g18n:getText("SM_ERROR_SPECTATE_YOURSELF"), 3000)
+        g_currentMission:showBlinkingWarning(g_i18n:getText("SM_ERROR_SPECTATE_YOURSELF"), 3000)
+    elseif reason == SpectateRejectedEvent.REASON_ACTOR_SPECTATING then
+        g_currentMission:showBlinkingWarning(g_i18n:getText("SM_ERROR_ACTOR_SPECTATING"), 3000)
     end
 end
 
@@ -335,13 +337,13 @@ end
 function SpectatorMode:delayedCameraChanged(actorName, cameraId, cameraIndex, cameraType)
     self:print(string.format("delayedCameraChanged(actorName:%s, cameraId:%s, cameraIndex:%s, cameraType:%s)", actorName, cameraId, cameraIndex, cameraType))
     if cameraType == CameraChangeEvent.CAMERA_TYPE_PLAYER then
+        --VehicleSchemaDisplay:setVehicle(nil)
+        --SpeedMeterDisplay:setVehicle(nil)
         setCamera(self.spectatedPlayerObject.cameraNode)
         self:setVehicleActiveCamera(nil)
         self.spectatedVehicle = nil
         self.spectatedPlayerObject.skipNextInterpolationAlpha = true
         self.spectatedPlayerObject.interpolationAlpha = 1
-        --VehicleSchemaDisplay:setVehicle(nil)
-        --SpeedMeterDisplay:setVehicle(nil)
     elseif cameraType == CameraChangeEvent.CAMERA_TYPE_VEHICLE then
         --print("g_currentMission.controlledVehicles start")
         --DebugUtil.printTableRecursively(g_currentMission.controlledVehicles, "", 0, 1)
@@ -358,7 +360,7 @@ function SpectatorMode:delayedCameraChanged(actorName, cameraId, cameraIndex, ca
                 --SpeedMeterDisplay:setVehicle(v)
                 spec.camerasLerp[v.spec_enterable.cameras[cameraIndex].cameraNode].skipNextInterpolationAlpha = true
                 spec.camerasLerp[v.spec_enterable.cameras[cameraIndex].cameraNode].interpolationAlpha = 1
-                --g_currentMission.hud:showVehicleName(v)
+            --g_currentMission.hud:showVehicleName(v)
             end
         end
     elseif cameraType == CameraChangeEvent.CAMERA_TYPE_VEHICLE_INDOOR then

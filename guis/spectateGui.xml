@@ -1,19 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <GUI onOpen="onOpen" onClose="onClose" onCreate="onCreate">
     <GuiElement type="empty" profile="newLayer" />
     <GuiElement type="bitmap" profile="dialogFullscreenBg" />
 
-    <GuiElement type="bitmap" profile="siloDialogBg" id="dialogElement">
+    <GuiElement type="bitmap" profile="yesNoDialogBg" id="dialogElement">
         <GuiElement type="bitmap" profile="dialogHeaderDocked">
-            <GuiElement type="text" profile="dialogHeaderText" text="$l10n_SM_NAME" id="dialogTitleElement"/>
+            <GuiElement type="text" profile="dialogHeaderText" text="$l10n_SM_NAME" id="dialogTitleElement" />
         </GuiElement>
 
-        <GuiElement type="text" profile="siloDialogText" text="$l10n_SM_GUI_DIALOG_TEXT:" id="dialogTextElement" />
+        <GuiElement type="text" profile="sleepDialogText" text="$l10n_SM_GUI_DIALOG_TEXT:" id="dialogTextElement" />
 
-        <GuiElement type="multiTextOption" profile="multiTextOptionSilo" onClick="onClickSpectableUsers" id="spectableUsersElement" focusInit="onOpen" handleFocus="true">
+        <GuiElement type="multiTextOption" profile="multiTextOptionSilo" onClick="onClickSpectableUsers" id="spectableUsersElement" focusInit="onOpen">
             <GuiElement type="button" profile="multiTextOptionLeft" />
             <GuiElement type="button" profile="multiTextOptionRight" />
-            <GuiElement type="text"   profile="multiTextOptionTextSilo" id="userName" />
+            <GuiElement type="text" profile="multiTextOptionTextSilo" id="userName" />
             <GuiElement type="bitmap" profile="multiTextOptionBgSilo" />
         </GuiElement>
 
@@ -21,8 +21,8 @@
             <GuiElement type="text" profile="siloDialogMessage" text="$l10n_SM_GUI_DIALOG_MESSAGE" />
         </GuiElement>
 
-        <GuiElement type="flowLayout" profile="buttonBoxDialog" id="buttonsPC">
-            <GuiElement type="button" profile="buttonOK" text="$l10n_button_start" onClick="onClickActivate" id="spectateButton" />
+        <GuiElement type="flowLayout" profile="buttonBoxDocked" id="buttonsPC">
+            <GuiElement type="button" profile="buttonOK" text="$l10n_button_start" onClick="onClickOk" id="spectateButton" />
             <GuiElement type="button" profile="buttonBack" text="$l10n_button_back" onClick="onClickBack" id="noButton" />
         </GuiElement>
     </GuiElement>

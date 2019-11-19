@@ -247,5 +247,8 @@
             <pl>Nie możesz podglądać samego siebie!!</pl>
             <it>Non puoi guardare te stesso!</it>
         </text>
+        <text name="SM_ERROR_ACTOR_SPECTATING">
+            <en>You can't spectate someone who is already spectating</en>
+        </text>
     </l10n>
 </modDesc>

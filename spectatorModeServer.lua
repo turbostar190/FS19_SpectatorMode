@@ -28,12 +28,19 @@ end
 function SpectatorModeServer:addSubscriber(sName, connection, aName)
     self:print("addSubscriber(sName:%s, connection:%s, aName:%s)", sName, connection, aName)
     if g_dedicatedServerInfo ~= nil and g_currentMission.player.visualInformation.playerName == aName then
+        self:print("    SpectateRejectedEvent:new(SpectateRejectedEvent.REASON_DEDICATED_SERVER)")
         connection:sendEvent(SpectateRejectedEvent:new(SpectateRejectedEvent.REASON_DEDICATED_SERVER))
         return
     end
     if sName == aName then
         self:print("    SpectateRejectedEvent:new(SpectateRejectedEvent.REASON_YOURSELF)")
         connection:sendEvent(SpectateRejectedEvent:new(SpectateRejectedEvent.REASON_YOURSELF))
+        return
+    end
+    -- Verificare che l'attore non stia già spectando
+    if self:isSpectating(aName) then
+        self:print("    SpectateRejectedEvent:new(SpectateRejectedEvent.REASON_ACTOR_SPECTATING)")
+        connection:sendEvent(SpectateRejectedEvent:new(SpectateRejectedEvent.REASON_ACTOR_SPECTATING))
         return
     end
     self:ensureAName(aName)
@@ -107,4 +114,13 @@ function SpectatorModeServer:ensureAName(aName)
     if self.clients[aName].mmState == nil then
         self.clients[aName].mmState = 0
     end
+end
+
+function SpectatorModeServer:isSpectating(name)
+    for _, v in pairs(self.clients) do
+        if v.subscribers[name] ~= nil then
+            return true
+        end
+    end
+    return false
 end
