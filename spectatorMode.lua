@@ -124,8 +124,8 @@ function SpectatorMode:registerActionEvents()
         --self.smSwitchActorPreviousEventId = eventId1
         --self.smSwitchActorNextEventId = eventId2
 
-        self:print(string.format("spectateGuiEventId: %s", tostring(self.spectateGuiEventId)))
-    --self:print(string.format("spectateGuiEventId: %s , smSwitchActorPreviousEventId: %s , smSwitchActorNextEventId: %s", tostring(self.spectateGuiEventId), tostring(self.smSwitchActorPreviousEventId), tostring(self.smSwitchActorNextEventId)))
+        self:print("spectateGuiEventId: %s", tostring(self.spectateGuiEventId))
+        --self:print(string.format("spectateGuiEventId: %s , smSwitchActorPreviousEventId: %s , smSwitchActorNextEventId: %s", tostring(self.spectateGuiEventId), tostring(self.smSwitchActorPreviousEventId), tostring(self.smSwitchActorNextEventId)))
     end
 end
 
@@ -143,7 +143,7 @@ function SpectatorMode:toggleActionEvent()
 end
 
 function SpectatorMode:showGui()
-    -- Se sei specatoto, non puoi a tua volta spectare
+    -- Se sei spectato, non puoi a tua volta spectare
     if self.spectated then
         return
     end
@@ -303,7 +303,7 @@ function SpectatorMode:stopSpectate(disconnect)
 end
 
 function SpectatorMode:spectateRejected(reason)
-    self:print(("spectateRejected(reason:%s)"):format(reason))
+    self:print("spectateRejected(reason:%s)", reason)
     self:stopSpectate()
     if reason == SpectateRejectedEvent.REASON_DEDICATED_SERVER then
         g_currentMission:showBlinkingWarning(g_i18n:getText("SM_ERROR_SPECTATE_DEDICATED_SERVER"), 3000)
@@ -326,7 +326,7 @@ end
 
 -- Called from event 'cameraChangeEvent'
 function SpectatorMode:cameraChanged(actorName, cameraId, cameraIndex, cameraType)
-    self:print(string.format("cameraChanged(actorName:%s, cameraId:%s, cameraIndex:%s, cameraType:%s)", actorName, cameraId, cameraIndex, cameraType))
+    self:print("cameraChanged(actorName:%s, cameraId:%s, cameraIndex:%s, cameraType:%s)", actorName, cameraId, cameraIndex, cameraType)
     if cameraType == CameraChangeEvent.CAMERA_TYPE_PLAYER then
         self.delayedCameraChangedDCB:call(20, actorName, cameraId, cameraIndex, cameraType)
     else
@@ -335,7 +335,7 @@ function SpectatorMode:cameraChanged(actorName, cameraId, cameraIndex, cameraTyp
 end
 
 function SpectatorMode:delayedCameraChanged(actorName, cameraId, cameraIndex, cameraType)
-    self:print(string.format("delayedCameraChanged(actorName:%s, cameraId:%s, cameraIndex:%s, cameraType:%s)", actorName, cameraId, cameraIndex, cameraType))
+    self:print("delayedCameraChanged(actorName:%s, cameraId:%s, cameraIndex:%s, cameraType:%s)", actorName, cameraId, cameraIndex, cameraType)
     if cameraType == CameraChangeEvent.CAMERA_TYPE_PLAYER then
         --VehicleSchemaDisplay:setVehicle(nil)
         --SpeedMeterDisplay:setVehicle(nil)
@@ -384,7 +384,7 @@ function SpectatorMode:delayedCameraChanged(actorName, cameraId, cameraIndex, ca
 end
 
 function SpectatorMode:setVehicleActiveCamera(cameraIndex)
-    self:print(string.format("setVehicleActiveCamera(cameraIndex:%s) self.spectatedVehicle ~= nil %s", cameraIndex, tostring(self.spectatedVehicle ~= nil)))
+    self:print("setVehicleActiveCamera(cameraIndex:%s) self.spectatedVehicle ~= nil %s", cameraIndex, tostring(self.spectatedVehicle ~= nil))
     if self.spectatedVehicle ~= nil then
         local useMirror = false
         if cameraIndex ~= nil then
@@ -404,7 +404,7 @@ function SpectatorMode:minimapChange(aName, mmState)
 end
 
 function SpectatorMode:requestToEnterVehicle(superFunc, vehicle)
-    g_spectatorMode:print("requestToEnterVehicle() g_spectatorMode.spectating " .. tostring(g_spectatorMode.spectating))
+    g_spectatorMode:print("requestToEnterVehicle() g_spectatorMode.spectating %s", tostring(g_spectatorMode.spectating))
     if not g_spectatorMode.spectating then
         if superFunc ~= nil then
             superFunc(self, vehicle)
@@ -416,9 +416,7 @@ function SpectatorMode:toggleSize(superFunc, state, force, noEventSend)
     if superFunc ~= nil then
         superFunc(self, state, force)
     end
-    if state == nil then
-        state = g_gameSettings:getValue("ingameMapState")
-    end
+    state = state or g_gameSettings:getValue("ingameMapState")
     g_spectatorMode:print("toggleSize(state:%s, force:%s, noEventSend:%s)", state, force, noEventSend)
     if not noEventSend then
         g_spectatorMode:print("Event.send(MinimapChangeEvent:new(controllerName:%s, state:%s, toServer:true))", g_currentMission.player.visualInformation.playerName, state)

@@ -136,6 +136,7 @@ function PlayerExtensions:getPositionData(superFunc)
     return superFunc(self)
 end
 
+-- TODO: Non funziona
 function Player:getIsSpectated()
     if g_spectatorMode ~= nil then
         if g_spectatorMode.spectating and self.visualInformation.playerName == g_spectatorMode.spectatedPlayer then

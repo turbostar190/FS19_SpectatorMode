@@ -227,6 +227,7 @@ function SMVehicle:onCameraChanged(activeCamera, camIndex)
     end
 end
 
+-- TODO: Non funziona
 function SMVehicle:getVehIsSpectated()
     if not isMultiplayer() then return end
 
