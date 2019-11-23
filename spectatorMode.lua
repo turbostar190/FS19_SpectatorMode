@@ -427,8 +427,13 @@ function SpectatorMode:toggleSize(superFunc, state, force, noEventSend)
 end
 
 function SpectatorMode:onUserRemoved(player)
+    g_spectatorMode:print("onUserRemoved player: %s", tostring(player.nickname))
     if g_spectatorMode.spectating and player.nickname == g_spectatorMode.spectatedPlayer then
-        self:print("Stopping spectating player " .. tostring(player.nickname))
+        g_spectatorMode:print("Stopping spectating player %s", tostring(player.nickname))
         g_spectatorMode:stopSpectate(true)
+    elseif g_spectatorMode.spectated then
+        g_spectatorMode:print("Stopping spectated player %s", tostring(player.nickname))
+        g_spectatorMode:print("Event.send(SpectateEvent:new(start:false, spectatorName:%s, actorName:%s))", player.nickname, g_currentMission.player.visualInformation.playerName)
+        Event.sendToServer(SpectateEvent:new(false, player.nickname, g_currentMission.player.visualInformation.playerName))
     end
 end

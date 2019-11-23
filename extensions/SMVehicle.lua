@@ -12,6 +12,7 @@ end
 
 function SMVehicle.registerFunctions(vehicleType)
     SpecializationUtil.registerFunction(vehicleType, "getVehIsSpectated", SMVehicle.getVehIsSpectated)
+    SpecializationUtil.registerFunction(vehicleType, "doSteeringWheelUpdate", SMVehicle.doSteeringWheelUpdate)
 end
 
 function SMVehicle.registerOverwrittenFunctions(vehicleType)
@@ -123,12 +124,11 @@ function SMVehicle:onUpdate(dt, isActiveForInput, isActiveForInputIgnoreSelectio
         end
     end
 
-    --TODO: Con AI inserita e guardata a piedi attraverso la spectator lo sterzo non ruota. Dovrebbe esserci una soluzione nella passenger mod
     -- This is needed as the Drivable.lua only shows this for the person who is the vehicle.
     if self.spec_drivable ~= nil and self:getIsAIActive() then
-        self:doSteeringWheelUpdate(self.spec_drivable.steeringWheel, dt, 1) -- TODO: Test
+        self:doSteeringWheelUpdate(self.spec_drivable.steeringWheel, dt, 1)
     end
-    self:raiseActive() -- ??
+    self:raiseActive()
 end
 
 function SMVehicle:doSteeringWheelUpdate(steeringWheel, dt, direction)
