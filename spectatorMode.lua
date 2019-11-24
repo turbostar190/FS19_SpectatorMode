@@ -253,7 +253,7 @@ function SpectatorMode:draw()
 end
 
 function SpectatorMode:startSpectate(playerIndex)
-    --self.lastPlayer.lastPositionX, self.lastPlayer.lastPositionY, self.lastPlayer.lastPositionZ = getTranslation(g_currentMission.player.graphicsRootNode)
+    self.lastPlayer.lastPositionX, self.lastPlayer.lastPositionY, self.lastPlayer.lastPositionZ = getWorldTranslation(g_currentMission.player.graphicsRootNode)
     g_currentMission.player.pickedUpObjectOverlay:setIsVisible(false)
     g_currentMission.isPlayerFrozen = true
     self.lastPlayer.lightNode = g_currentMission.player.lightNode
@@ -273,7 +273,6 @@ function SpectatorMode:startSpectate(playerIndex)
 end
 
 function SpectatorMode:stopSpectate(disconnect)
-    --TODO: Detach camera where event happens. Now it follows player still after stopping spectate
     g_currentMission.hud.ingameMap:toggleSize(self.lastPlayer.mmState, true)
     g_currentMission.hasSpecialCamera = false
     self:setVehicleActiveCamera(nil)
@@ -282,14 +281,15 @@ function SpectatorMode:stopSpectate(disconnect)
     if not disconnect then
         self.delayedStopSpectateDCB:call(100, self.spectatedPlayerObject, self.spectatedVehicle)
     end
-    --self.spectatedPlayerObject:setVisibility(true)
     self.spectatedPlayerObject:setWoodWorkVisibility(true, true)
-    --[[    if self.spectatedVehicle ~= nil then
-            g_currentMission.player:moveToExitPoint(self.spectatedVehicle)
-        else
-            local x, y, z = getTranslation(self.spectatedPlayerObject.rootNode)
-            g_currentMission.player:moveToAbsoluteInternal(x, y, z)
-        end]]
+    if self.spectatedVehicle ~= nil then
+        g_currentMission.player:moveToExitPoint(self.spectatedVehicle)
+    else
+        --local x, y, z = getTranslation(self.spectatedPlayerObject.rootNode)
+        --g_currentMission.player:moveToAbsolute(x, y, z)
+        g_currentMission.player:moveToAbsolute(g_currentMission.player.rootNode, self.lastPlayer.lastPositionY, self.lastPlayer.lastPositionZ)
+        setTranslation(g_currentMission.player.rootNode, self.lastPlayer.lastPositionX, self.lastPlayer.lastPositionY, self.lastPlayer.lastPositionZ)
+    end
     self.spectatedPlayerObject = nil
     self.spectatedPlayer = nil
     --self.spectatedPlayerIndex = nil
@@ -297,8 +297,7 @@ function SpectatorMode:stopSpectate(disconnect)
     g_currentMission.player.pickedUpObjectOverlay:setIsVisible(true)
     g_currentMission.isPlayerFrozen = false
     g_currentMission.player.lightNode = self.lastPlayer.lightNode -- enable ability to toggle player light
-    --setTranslation(self.lastPlayer.lastPositionX, self.lastPlayer.lastPositionY, self.lastPlayer.lastPositionZ)
-    g_currentMission.player:onEnter()
+    g_currentMission.player:onEnter(true)
     self.spectating = false
 end
 
