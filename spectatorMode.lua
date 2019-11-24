@@ -269,7 +269,7 @@ function SpectatorMode:startSpectate(playerIndex)
     Event.sendToServer(SpectateEvent:new(true, g_currentMission.player.visualInformation.playerName, self.spectatedPlayer))
     self.lastPlayer.mmState = g_currentMission.hud.ingameMap.state
     self.spectateFadeEffect:play(self.spectatedPlayer)
-    --g_currentMission.player:onLeave()
+    g_currentMission.player:onLeave()
 end
 
 function SpectatorMode:stopSpectate(disconnect)
@@ -298,7 +298,7 @@ function SpectatorMode:stopSpectate(disconnect)
     g_currentMission.isPlayerFrozen = false
     g_currentMission.player.lightNode = self.lastPlayer.lightNode -- enable ability to toggle player light
     --setTranslation(self.lastPlayer.lastPositionX, self.lastPlayer.lastPositionY, self.lastPlayer.lastPositionZ)
-    --g_currentMission.player:onEnter()
+    g_currentMission.player:onEnter()
     self.spectating = false
 end
 
