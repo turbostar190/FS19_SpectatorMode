@@ -23,7 +23,6 @@ end
 
 function SMVehicle.registerEventListeners(vehicleType)
     local events = { "onPostLoad",
-        --"onUpdateInterpolation",
                      "onUpdate",
                      "onReadUpdateStream",
                      "onWriteUpdateStream",

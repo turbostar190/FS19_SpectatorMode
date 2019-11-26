@@ -37,9 +37,7 @@ end
 
 function PlayerExtensions:readUpdateStream(streamId, timestamp, connection)
     if not self.isOwner and connection:getIsServer() then
-        self.lastQuaternion = {
-            getQuaternion(self.cameraNode)
-        }
+        self.lastQuaternion = { getQuaternion(self.cameraNode) }
         self.networkInformation.interpolationTime:startNewPhaseNetwork()
         self.networkInformation.interpolatorQuaternion:setTargetQuaternion(streamReadFloat32(streamId), streamReadFloat32(streamId), streamReadFloat32(streamId), streamReadFloat32(streamId))
         local physicsIndex = getPhysicsUpdateIndex()
@@ -71,9 +69,6 @@ function PlayerExtensions:update(dt)
 end
 
 function PlayerExtensions:onEnter(isOwner)
-    print("Appended onenter isOwner: " .. tostring(isOwner and isOwner or "nil"))
-    print(string.format("g_spectatorMode.spectating %s self.visualInformation.playerName == g_spectatorMode.spectatedPlayer %s",
-            tostring(g_spectatorMode.spectating), tostring(self.visualInformation.playerName == g_spectatorMode.spectatedPlayer)))
     if isOwner then
         if not g_spectatorMode.spectating then
             g_spectatorMode:print("Player.send(CameraChangeEvent:new(controllerName:%s, cameraNode:%s, camIndex:%s, cameraType:%s, toServer:true))", g_currentMission.player.visualInformation.playerName, self.cameraNode, 0, CameraChangeEvent.CAMERA_TYPE_PLAYER)
