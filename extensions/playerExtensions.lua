@@ -88,20 +88,6 @@ function PlayerExtensions:drawUIInfo(superFunc)
     end
     if not spectated then
         superFunc(self)
---[[        if self.isClient and self.isControlled and not self.isEntered then
-            if not g_gui:getIsGuiVisible() and not g_flightAndNoHUDKeysEnabled then
-                local x, y, z = getTranslation(self.graphicsRootNode)
-                local x1, y1, z1 = getWorldTranslation(getCamera())
-                local diffX = x - x1
-                local diffY = y - y1
-                local diffZ = z - z1
-                local dist = MathUtil.vector3LengthSq(diffX, diffY, diffZ)
-                if dist <= 100 * 100 then
-                    y = y + self.baseInformation.tagOffset[2]
-                    Utils.renderTextAtWorldPosition(x, y, z, self.visualInformation.playerName, getCorrectTextSize(0.02), 0)
-                end
-            end
-        end]]
     end
 end
 

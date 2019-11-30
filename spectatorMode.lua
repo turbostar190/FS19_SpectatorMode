@@ -290,6 +290,7 @@ function SpectatorMode:stopSpectate(disconnect)
         y = y + deltaTerrainHeight
     end
     g_currentMission.player:moveRootNodeToAbsolute(x, y, z)
+    g_currentMission.player:onEnter(true)
 
     self.spectatedPlayerObject = nil
     self.spectatedPlayer = nil
@@ -298,7 +299,6 @@ function SpectatorMode:stopSpectate(disconnect)
     g_currentMission.player.pickedUpObjectOverlay:setIsVisible(true)
     g_currentMission.isPlayerFrozen = false
     g_currentMission.player.lightNode = self.lastPlayer.lightNode -- enable ability to toggle player light
-    g_currentMission.player:onEnter(true)
     self.spectating = false
 end
 

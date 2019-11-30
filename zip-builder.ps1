@@ -1,4 +1,4 @@
-$include = @("*.xml", "*.lua", "*.i3d", "*.i3d.shapes", "*.dds", "*.ogg", "README.md")
+$include = @("*.xml", "*.lua", "*.i3d", "*.i3d.shapes", "*.dds")
 $zipfilename = "FS19_SpectatorMode_dev.zip"
 
 if (test-path "$env:ProgramFiles\7-Zip\7z.exe") {
