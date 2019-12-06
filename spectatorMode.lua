@@ -72,6 +72,8 @@ function SpectatorMode:new(mission, i18n, modDirectory, gui, inputManager, dedic
     Player.drawUIInfo = Utils.overwrittenFunction(Player.drawUIInfo, PlayerExtensions.drawUIInfo)
     Player.getPositionData = Utils.overwrittenFunction(Player.getPositionData, PlayerExtensions.getPositionData)
 
+    GuiTopDownCamera.activate = Utils.overwrittenFunction(GuiTopDownCamera.activate, self.onTopDownCameraActivate)
+
     -- Misc
     BaseMission.requestToEnterVehicle = Utils.overwrittenFunction(BaseMission.requestToEnterVehicle, self.requestToEnterVehicle)
     IngameMap.toggleSize = Utils.overwrittenFunction(IngameMap.toggleSize, self.toggleSize)
@@ -415,4 +417,12 @@ function SpectatorMode:onUserRemoved(player)
         g_spectatorMode:print("Event.send(SpectateEvent:new(start:false, spectatorName:%s, actorName:%s))", player.nickname, g_currentMission.player.visualInformation.playerName)
         Event.sendToServer(SpectateEvent:new(false, player.nickname, g_currentMission.player.visualInformation.playerName))
     end
+end
+
+function SpectatorMode:onTopDownCameraActivate(superFunc)
+    print("overwritten onTopDownCameraActivate()")
+    if self.camera ~= nil then
+        print("camera: " .. tostring(self.camera))
+    end
+    return superFunc(self)
 end
