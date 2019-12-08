@@ -43,7 +43,44 @@ function SMVehicle:onPostLoad(savegame)
     local spec = self:spectatorMode_getSpecTable()
 
     spec.camerasLerp = {}
+    local match
     for _, v in pairs(self.spec_enterable.cameras) do
+        -- Fix 'positionSmoothingParameter' set to 0 in vehicle xml (At the moment only known on pickups)
+        match = string.match(v.vehicle.i3dFilename, 'pickup%d%d%d%d')
+        if (v.positionSmoothingParameter == 0 and match) then
+            print(string.format("Spectator Mode: fixing 'positionSmoothingParameter' on '%s'", match))
+            --print(string.format("cameraNode %s cameraPositionNode %s rotateNode %s", tostring(v.cameraNode), tostring(v.cameraPositionNode), tostring(v.rotateNode)))
+            -- VehicleCamera.lua
+            if v.isInside then
+                v.positionSmoothingParameter = 0.128 -- 0.095
+                v.lookAtSmoothingParameter = 0.176 -- 0.12
+            else
+                v.positionSmoothingParameter = 0.016
+                v.lookAtSmoothingParameter = 0.022
+            end
+
+            -- create a node which indicates the target position of the camera
+            v.cameraPositionNode = createTransformGroup("cameraPositionNode")
+            local camIndex = getChildIndex(v.cameraNode)
+            link(getParent(v.cameraNode), v.cameraPositionNode, camIndex)
+            local x, y, z = getTranslation(v.cameraNode)
+            local rx, ry, rz = getRotation(v.cameraNode)
+            setTranslation(v.cameraPositionNode, x, y, z)
+            setRotation(v.cameraPositionNode, rx, ry, rz)
+
+            unlink(v.cameraNode)
+            --print(string.format("cameraNode %s cameraPositionNode %s rotateNode %s", tostring(v.cameraNode), tostring(v.cameraPositionNode), tostring(v.rotateNode)))
+
+            if v.rotateNode == nil or v.rotateNode == v.cameraNode then
+                v.rotateNode = v.cameraPositionNode
+            end
+
+            --TODO: In multi hostato, l'host che specta non riceve movimenti della camera dall'altro utente
+
+            --print(string.format("cameraNode %s cameraPositionNode %s rotateNode %s", tostring(v.cameraNode), tostring(v.cameraPositionNode), tostring(v.rotateNode)))
+            --DebugUtil.printTableRecursively(self.spec_enterable.cameras, " ", 0, 3)
+        end
+
         spec.camerasLerp[v.cameraNode] = {}
         spec.camerasLerp[v.cameraNode].lastQuaternion = { 0, 0, 0, 0 }
         spec.camerasLerp[v.cameraNode].targetQuaternion = { 0, 0, 0, 0 }
