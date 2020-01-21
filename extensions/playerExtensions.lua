@@ -82,13 +82,13 @@ function PlayerExtensions:onEnter(isOwner)
 end
 
 function PlayerExtensions:drawUIInfo(superFunc)
-    local spectated
-    if self.getIsSpectated ~= nil then
-        spectated = self:getIsSpectated()
-    end
-    if not spectated then
+    --local spectated
+    --if self.getIsSpectated ~= nil then
+    --    spectated = self:getIsSpectated()
+    --end
+    --if not spectated then
         superFunc(self)
-    end
+    --end
 end
 
 function PlayerExtensions:getPositionData(superFunc)
@@ -109,6 +109,8 @@ function PlayerExtensions:getPositionData(superFunc)
         else
             local pl = g_spectatorMode.spectatedPlayerObject
             local posX, posY, posZ = getTranslation(pl.rootNode)
+
+            -- TODO: Rotazione freccetta non corretta
             if pl.isClient and pl.isControlled and pl.isEntered then
                 return posX, posY, posZ, pl.rotY
             else
@@ -121,11 +123,11 @@ function PlayerExtensions:getPositionData(superFunc)
 end
 
 -- TODO: Non funziona
-function Player:getIsSpectated()
+--[[function Player:getIsSpectated()
     if g_spectatorMode ~= nil then
         if g_spectatorMode.spectating and self.visualInformation.playerName == g_spectatorMode.spectatedPlayer then
             return true
         end
     end
     return false
-end
+end]]

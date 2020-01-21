@@ -20,7 +20,6 @@ source(modDirectory .. "events/spectateEvent.lua")
 source(modDirectory .. "events/spectateRejectedEvent.lua")
 source(modDirectory .. "utils/delayedCallBack.lua")
 source(modDirectory .. "utils/fadeEffect.lua")
-source(modDirectory .. "utils/i18nUtils.lua")
 
 local spectatorMode
 
@@ -37,7 +36,7 @@ function init()
 end
 
 function validateVehicleTypes(vehicleTypeManager)
-    mergeI18N(g_i18n) --Utils class?
+    SMUtils.mergeI18N(g_i18n) --Utils class?
     SpectatorMode.installSpecialization(g_vehicleTypeManager, g_specializationManager, modDirectory, modName)
 end
 
