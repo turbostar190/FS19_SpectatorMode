@@ -395,6 +395,7 @@ function SpectatorMode:requestToEnterVehicle(superFunc, vehicle)
 end
 
 function SpectatorMode:toggleSize(superFunc, state, force, noEventSend)
+    if g_spectatorMode.spectating and not force then return end
     if superFunc ~= nil then
         superFunc(self, state, force)
     end
