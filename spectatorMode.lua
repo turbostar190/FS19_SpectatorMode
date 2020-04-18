@@ -91,6 +91,7 @@ function SpectatorMode:print(text, ...)
         end
         local start = string.format("%s[%s(%s)] -> ", self.name, getDate("%H:%M:%S"), pre)
         local ptext = string.format(text, ...)
+        print(string.format("%s%s", start, ptext))
     end
 end
 
