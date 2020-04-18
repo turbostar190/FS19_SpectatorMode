@@ -48,7 +48,7 @@ function SMVehicle:onPostLoad(savegame)
         -- Fix 'positionSmoothingParameter' setted to 0 in vehicle xml (At the moment only known on pickups)
         --match = string.match(c.vehicle.i3dFilename, 'pickup%d%d%d%d')
         --if (c.positionSmoothingParameter == 0 and match) then
-            --SMUtils.fixPosSmoothParameterCamera(c, match)
+        --SMUtils.fixPosSmoothParameterCamera(c, match)
         --end
 
         spec.camerasLerp[c.cameraNode] = {}
@@ -69,7 +69,8 @@ function SMVehicle:onUpdate(dt, isActiveForInput, isActiveForInputIgnoreSelectio
     local spec = self:spectatorMode_getSpecTable()
     local specE = self.spec_enterable
 
-    if not specE.isEntered then
+    --if not specE.isEntered then
+    if not self:getIsEntered() then
         for _, v in pairs(specE.cameras) do
             spec.camerasLerp[v.cameraNode].interpolationAlpha = spec.camerasLerp[v.cameraNode].interpolationAlpha + g_physicsDtUnclamped / self.networkTimeInterpolator.interpolationDuration
             if spec.camerasLerp[v.cameraNode].interpolationAlpha > 1.2 then
@@ -135,10 +136,12 @@ function SMVehicle:onUpdate(dt, isActiveForInput, isActiveForInputIgnoreSelectio
     if self.spec_drivable ~= nil and self:getIsAIActive() then
         self:doSteeringWheelUpdateAI(self.spec_drivable.steeringWheel, dt, 1)
     end
-    self:raiseActive()
+
+    self:getRootVehicle():raiseActive()
 end
 
 function SMVehicle:doSteeringWheelUpdateAI(steeringWheel, dt, direction)
+    print("doSteeringWheelUpdateAI steeringWheel ~= nil " .. tostring(steeringWheel ~= nil))
     if steeringWheel ~= nil then
         local maxRotation = steeringWheel.outdoorRotation
         local activeCamera = self.spec_enterable.activeCamera
@@ -161,7 +164,6 @@ end
 function SMVehicle:onWriteUpdateStream(streamId, connection)
     if not isMultiplayer() then return end
 
-    --if not connection:getIsServer() then
     local spec = self:spectatorMode_getSpecTable()
     local specE = self.spec_enterable
     if self.isServer and not specE.isEntered then
@@ -187,13 +189,11 @@ function SMVehicle:onWriteUpdateStream(streamId, connection)
             streamWriteFloat32(streamId, z)
         end
     end
-    --end
 end
 
 function SMVehicle:onReadUpdateStream(streamId, timestamp, connection)
     if not isMultiplayer() then return end
 
-    --if connection:getIsServer() then
     local spec = self:spectatorMode_getSpecTable()
     for _, v in pairs(self.spec_enterable.cameras) do
         local x, y, z, w, tx, ty, tz = 0
@@ -214,7 +214,6 @@ function SMVehicle:onReadUpdateStream(streamId, timestamp, connection)
             spec.camerasLerp[v.cameraNode].skipNextInterpolationAlpha = false
         end
     end
-    --end
 end
 
 -- Callback for the onCameraChanged event, which is triggered when the active camera

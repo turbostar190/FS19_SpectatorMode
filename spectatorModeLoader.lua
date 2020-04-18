@@ -36,7 +36,7 @@ function init()
 end
 
 function validateVehicleTypes(vehicleTypeManager)
-    SMUtils.mergeI18N(g_i18n) --Utils class?
+    SMUtils.mergeI18N(g_i18n)
     SpectatorMode.installSpecialization(g_vehicleTypeManager, g_specializationManager, modDirectory, modName)
 end
 

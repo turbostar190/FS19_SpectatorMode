@@ -91,7 +91,6 @@ function SpectatorMode:print(text, ...)
         end
         local start = string.format("%s[%s(%s)] -> ", self.name, getDate("%H:%M:%S"), pre)
         local ptext = string.format(text, ...)
-        print(string.format("%s%s", start, ptext))
     end
 end
 
@@ -420,6 +419,8 @@ function SpectatorMode:onUserRemoved(player)
     end
 end
 
+-- TODO: Dovremmo attivare la camera della vista dall'alto e magari sincronizzare i movimenti?
+-- Oppure quando in questo stato o fermare lo spectating o una specie di pausa senza che la camera faccia quello che voglia.
 function SpectatorMode:onTopDownCameraActivate(superFunc)
     print("overwritten onTopDownCameraActivate()")
     if self.camera ~= nil then
