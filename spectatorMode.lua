@@ -211,6 +211,13 @@ function SpectatorMode:update(dt)
         self:print("update() CameraChanged(from:%s to:%s)", self.lastCamera, getCamera())
         self.lastCamera = getCamera()
     end
+
+--[[    if self.spectated then
+        if g_currentMission.controlledVehicle ~= nil then
+            print("raiseActive")
+            g_currentMission.controlledVehicle:getRootVehicle():raiseActive()
+        end
+    end]]
 end
 
 function SpectatorMode:draw()
@@ -421,7 +428,7 @@ function SpectatorMode:onUserRemoved(player)
 end
 
 -- TODO: Dovremmo attivare la camera della vista dall'alto e magari sincronizzare i movimenti?
--- Oppure quando in questo stato o fermare lo spectating o una specie di pausa senza che la camera faccia quello che voglia.
+-- TODO: Oppure quando in questo stato o fermare lo spectating o una specie di pausa senza che la camera faccia quello che voglia.
 function SpectatorMode:onTopDownCameraActivate(superFunc)
     print("overwritten onTopDownCameraActivate()")
     if self.camera ~= nil then

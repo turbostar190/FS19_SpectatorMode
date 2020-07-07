@@ -137,11 +137,10 @@ function SMVehicle:onUpdate(dt, isActiveForInput, isActiveForInputIgnoreSelectio
         self:doSteeringWheelUpdateAI(self.spec_drivable.steeringWheel, dt, 1)
     end
 
-    self:getRootVehicle():raiseActive()
+    --self:raiseActive()
 end
 
 function SMVehicle:doSteeringWheelUpdateAI(steeringWheel, dt, direction)
-    print("doSteeringWheelUpdateAI steeringWheel ~= nil " .. tostring(steeringWheel ~= nil))
     if steeringWheel ~= nil then
         local maxRotation = steeringWheel.outdoorRotation
         local activeCamera = self.spec_enterable.activeCamera
@@ -230,15 +229,15 @@ function SMVehicle:onCameraChanged(activeCamera, camIndex)
         end
         g_spectatorMode:print("Steerable.send(CameraChangeEvent:new(controllerName:%s, cameraNode:%s, camIndex:%s, cameraType:%s, toServer:true))", g_currentMission.player.visualInformation.playerName, activeCamera.cameraNode, camIndex, cameraType)
         Event.sendToServer(CameraChangeEvent:new(g_currentMission.player.visualInformation.playerName, activeCamera.cameraNode, camIndex, cameraType, true))
+        self:raiseActive()
     end
 end
 
--- TODO: Non funziona
+-- TODO: Not working properly
 function SMVehicle:getVehIsSpectated()
     if not isMultiplayer() then return end
 
-    if g_spectatorMode ~= nil and self.spectatedVehicle ~= nil then
-        --if g_spectatorMode.spectating and self:getControllerName() == g_spectatorMode.spectatedPlayer then
+    if g_spectatorMode ~= nil and g_spectatorMode.spectatedVehicle ~= nil then
         if g_spectatorMode.spectating and self == g_spectatorMode.spectatedVehicle then
             return true
         end
