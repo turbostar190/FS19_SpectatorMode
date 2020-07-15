@@ -19,9 +19,9 @@ function SpectatorMode:new(mission, i18n, modDirectory, gui, inputManager, dedic
     self.inputManager = inputManager
     self.debug = debug
 
-    self.spectateGuiEventId = ""
-    self.smSwitchActorPreviousEventId = ""
-    self.smSwitchActorNextEventId = ""
+    self.spectateGuiEventId = -1
+    self.smSwitchActorPreviousEventId = -1
+    self.smSwitchActorNextEventId = -1
 
     self.spectateGui = SpectateGui:new(self.isServer, self.isClient)
     local xml = Utils.getFilename("guis/spectateGui.xml", self.modDirectory)
@@ -99,7 +99,7 @@ end
 -- The vehicle types must not be initialized yet to make any changes to them.
 function SpectatorMode.installSpecialization(vehicleTypeManager, specializationManager, modDirectory, modName)
     if g_specializationManager:getSpecializationByName("SMVehicle") == nil then
-        specializationManager:addSpecialization("SMV", "SMVehicle", Utils.getFilename("extensions/SMVehicle.lua", modDirectory), nil) -- Nil is important here
+        specializationManager:addSpecialization("SMV", "SMVehicle", Utils.getFilename("extensions/SMVehicle.lua", modDirectory), nil) -- nil is important here
 
         for typeName, typeEntry in pairs(vehicleTypeManager:getVehicleTypes()) do
             if SpecializationUtil.hasSpecialization(Enterable, typeEntry.specializations) then
@@ -154,7 +154,6 @@ end
 function SpectatorMode:getSpectableUsers()
     local spectableUsers = {}
     for _, p in pairs(g_currentMission.players) do
-        --self:print("p.isDedicatedServer %s p:getIsSpectated() %s g_currentMission.player.visualInformation.playerName %s p.visualInformation.playerName %s", p.isDedicatedServer, p:getIsSpectated(), g_currentMission.player.visualInformation.playerName, p.visualInformation.playerName)
         -- Evitiamo di inserire in lista se stessi e il server dedicato
         if not p.isDedicatedServer and g_currentMission.player.visualInformation.playerName ~= p.visualInformation.playerName then
             table.insert(spectableUsers, p.visualInformation.playerName)
@@ -212,25 +211,25 @@ function SpectatorMode:update(dt)
         self.lastCamera = getCamera()
     end
 
---[[    if self.spectated then
+    if self.spectated then
         if g_currentMission.controlledVehicle ~= nil then
-            print("raiseActive")
+            --print("raiseActive")
             g_currentMission.controlledVehicle:getRootVehicle():raiseActive()
         end
-    end]]
+    end
 end
 
 function SpectatorMode:draw()
     self.spectateFadeEffect:draw()
-    if self.spectatedVehicle ~= nil then
+    -- TODO: Not Working
+--[[    if self.spectatedVehicle ~= nil then
         if self.spectatedVehicle.spec_drivable ~= nil then
-            -- TODO: Not Working
             --g_currentMission:drawVehicleHud(self.spectatedVehicle)
             --g_currentMission:drawHudIcon()
             --g_vehicleSchemaDisplay:drawVehicleSchemaOverlays(self.spectatedVehicle)
             --g_currentMission:drawVehicleSchemaOverlays(self.spectatedVehicle)
         end
-    end
+    end]]
     if self.spectated then
         self.spectatedOverlay:render()
     end
@@ -303,7 +302,7 @@ function SpectatorMode:stopSpectate(disconnect)
 
     self.spectatedPlayerObject = nil
     self.spectatedPlayer = nil
-    --self.spectatedPlayerIndex = nil
+    --self.spectatedPlayerIndex = 1 --nil
     self.spectatedVehicle = nil
     g_currentMission.player.pickedUpObjectOverlay:setIsVisible(true)
     g_currentMission.isPlayerFrozen = false
@@ -346,6 +345,7 @@ end
 function SpectatorMode:delayedCameraChanged(actorName, cameraId, cameraIndex, cameraType)
     self:print("delayedCameraChanged(actorName:%s, cameraId:%s, cameraIndex:%s, cameraType:%s)", actorName, cameraId, cameraIndex, cameraType)
     local isVehicleCamera = cameraType == CameraChangeEvent.CAMERA_TYPE_VEHICLE
+
     if cameraType == CameraChangeEvent.CAMERA_TYPE_PLAYER then
         --VehicleSchemaDisplay:setVehicle(nil)
         --SpeedMeterDisplay:setVehicle(nil)
@@ -354,6 +354,7 @@ function SpectatorMode:delayedCameraChanged(actorName, cameraId, cameraIndex, ca
         self.spectatedVehicle = nil
         self.spectatedPlayerObject.skipNextInterpolationAlpha = true
         self.spectatedPlayerObject.interpolationAlpha = 1
+
     elseif isVehicleCamera or cameraType == CameraChangeEvent.CAMERA_TYPE_VEHICLE_INDOOR then
         for _, v in pairs(g_currentMission.controlledVehicles) do
             -- print("v:getControllerName() " .. tostring(v:getControllerName()) .. " actorName " .. actorName)

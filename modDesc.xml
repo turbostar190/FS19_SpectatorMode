@@ -39,28 +39,28 @@
 
     <l10n>
         <text name="input_SM_TOGGLE">
-            <de>Starten/Stoppen Sie den Zuschauermodus</de>
-            <en>Start/Stop spectating</en>
-            <fr>Mode spectateur : Activé / Désactivé</fr>
-            <it>Avvia/Interrompi modalità spettatore</it>
-            <nl>Start/Stop Kijkers Modus</nl>
-            <pl>Rozpocznij/Zakończ podglądanie</pl>
+            <de>SM: Starten/Stoppen Sie den Zuschauermodus</de>
+            <en>SM: Start/Stop spectating</en>
+            <fr>SM: Mode spectateur : Activé / Désactivé</fr>
+            <it>SM: Avvia/Interrompi modalità spettatore</it>
+            <nl>SM: Start/Stop Kijkers Modus</nl>
+            <pl>SM: Rozpocznij/Zakończ podglądanie</pl>
         </text>
         <text name="input_SM_SWITCH_ACTOR_PREVIOUS">
-            <de>Früher spieler</de>
-            <en>Previous player</en>
-            <fr>Joueur précédent</fr>
-            <it>Giocatore precedente</it>
-            <nl>Vorige speler</nl>
-            <pl>Poprzedni gracz</pl>
+            <de>SM: Früher spieler</de>
+            <en>SM: Previous player</en>
+            <fr>SM: Joueur précédent</fr>
+            <it>SM: Osserva giocatore precedente</it>
+            <nl>SM: Vorige speler</nl>
+            <pl>SM: Poprzedni gracz</pl>
         </text>
         <text name="input_SM_SWITCH_ACTOR_NEXT">
-            <de>Folgend spieler</de>
-            <en>Next player</en>
-            <fr>Joueur suivant</fr>
-            <it>Prossimo giocatore</it>
-            <nl>Volgende speler</nl>
-            <pl>Następny gracz</pl>
+            <de>SM: Folgend spieler</de>
+            <en>SM: Next player</en>
+            <fr>SM: Joueur suivant</fr>
+            <it>SM: Osserva prossimo giocatore</it>
+            <nl>SM: Volgende speler</nl>
+            <pl>SM: Następny gracz</pl>
         </text>
         <text name="SM_SWITCH_ACTOR_PREVIOUS">
             <de>Aussehen %s</de>
@@ -119,7 +119,7 @@
             <pl>Nie ma graczy, których możesz podglądać</pl>
         </text>
         <text name="SM_ERROR_SPECTATE_DEDICATED_SERVER">
-            <en>You can't spectate the dedicated server's player</en>
+            <en>You can't spectate the dedicated server's player!</en>
             <pl>Nie możesz podglądać graczy na serwerze dedykowanym!!</pl>
         </text>
         <text name="SM_ERROR_SPECTATE_YOURSELF">
@@ -128,7 +128,7 @@
             <it>Non puoi guardare te stesso!</it>
         </text>
         <text name="SM_ERROR_ACTOR_SPECTATING">
-            <en>You can't spectate someone who is already spectating</en>
+            <en>You can't spectate someone who is already spectating!</en>
         </text>
     </l10n>
 </modDesc>

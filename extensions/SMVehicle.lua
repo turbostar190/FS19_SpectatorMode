@@ -43,13 +43,8 @@ function SMVehicle:onPostLoad(savegame)
     local spec = self:spectatorMode_getSpecTable()
 
     spec.camerasLerp = {}
-    --local match
     for _, c in pairs(self.spec_enterable.cameras) do
-        -- Fix 'positionSmoothingParameter' setted to 0 in vehicle xml (At the moment only known on pickups)
-        --match = string.match(c.vehicle.i3dFilename, 'pickup%d%d%d%d')
-        --if (c.positionSmoothingParameter == 0 and match) then
-        --SMUtils.fixPosSmoothParameterCamera(c, match)
-        --end
+        -- No fix at 'positionSmoothingParameter' setted to 0 in vehicle xml (At the moment only known on pickups)
 
         spec.camerasLerp[c.cameraNode] = {}
         spec.camerasLerp[c.cameraNode].lastQuaternion = { 0, 0, 0, 0 }
@@ -137,7 +132,9 @@ function SMVehicle:onUpdate(dt, isActiveForInput, isActiveForInputIgnoreSelectio
         self:doSteeringWheelUpdateAI(self.spec_drivable.steeringWheel, dt, 1)
     end
 
-    --self:raiseActive()
+    if spec:getVehIsSpectated() then
+        self:getRootVehicle():raiseActive()
+    end
 end
 
 function SMVehicle:doSteeringWheelUpdateAI(steeringWheel, dt, direction)
